@@ -1,0 +1,40 @@
+{
+  "name": "miid",
+  "version": "0.0.0",
+  "license": "MIT",
+  "author": "Etienne Dldc <e.deladonchamps@gmail.com>",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/index.js",
+  "module": "dist/miid.esm.js",
+  "typings": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsdx build",
+    "start": "tsdx watch",
+    "test": "tsdx test",
+    "pub": "yarn build && np"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jest": "^24.9.0",
+    "np": "^5.2.1",
+    "tsdx": "^0.12.3",
+    "tslib": "^1.10.0",
+    "typescript": "^3.7.5"
+  },
+  "description": "A middleware and context system",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/etienne-dldc/miid.git"
+  },
+  "keywords": [
+    "middleware",
+    "context",
+    "typescript"
+  ],
+  "bugs": {
+    "url": "https://github.com/etienne-dldc/miid/issues"
+  },
+  "homepage": "https://github.com/etienne-dldc/miid#readme"
+}
