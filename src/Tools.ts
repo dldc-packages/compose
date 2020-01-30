@@ -1,5 +1,6 @@
-import { ContextStack, ContextProvider, ContextConsumer } from './Context';
-import { CONTEXT, DONE, TUMAU_DEBUG } from './constants';
+import { ContextStack, ContextProvider, ContextConsumer } from "./Context";
+import { CONTEXT, DONE, TUMAU_DEBUG } from "./constants";
+import { MiidError } from "./MiidError";
 
 export type AsyncResult<R> = Promise<R>;
 export type Result<R> = R | AsyncResult<R>;
@@ -10,14 +11,17 @@ export type Done<R> = (content: ContextStack | null) => Result<R>;
 export const Tools = {
   create: createTools,
   getContext: getToolsContext,
-  getDone: getToolsDone,
+  getDone: getToolsDone
 };
 
 export interface Tools<R> {
   [CONTEXT]: ContextStack | null;
   [DONE]: Done<R>;
   next: Next<R>;
-  withContext: (first: ContextProvider<any>, ...contexts: Array<ContextProvider<any>>) => Tools<R>;
+  withContext: (
+    first: ContextProvider<any>,
+    ...contexts: Array<ContextProvider<any>>
+  ) => Tools<R>;
   hasContext: (ctx: ContextConsumer<any, any>) => boolean;
   readContext: <T, HasDefault extends boolean>(
     ctx: ContextConsumer<T, HasDefault>
@@ -40,7 +44,9 @@ function createTools<R>(context: ContextStack | null, done: Done<R>): Tools<R> {
     next: () => Promise.resolve(done(context)),
     withContext: (first, ...contexts) => {
       const nextStack =
-        context === null ? ContextStack.create(first, ...contexts) : ContextStack.add(context, first, ...contexts);
+        context === null
+          ? ContextStack.create(first, ...contexts)
+          : ContextStack.add(context, first, ...contexts);
       return createTools(nextStack, done);
     },
     readContext: ctx => {
@@ -59,21 +65,23 @@ function createTools<R>(context: ContextStack | null, done: Done<R>): Tools<R> {
         if (ctx[CONTEXT].hasDefault) {
           return ctx[CONTEXT].defaultValue;
         }
-        throw new Error(`Missing context`);
+        throw new MiidError.MissingContext(ctx);
       }
       return res.value;
     },
     hasContext: ctx => {
       return ContextStack.read(context, ctx).found;
-    },
+    }
   };
 
   (tools as any).debug = () => debugStack(context);
   return tools;
 }
 
-function debugStack(currentStack: ContextStack | null): Array<{ value: any; ctxId: string }> {
-  const world: any = typeof window !== 'undefined' ? window : global;
+function debugStack(
+  currentStack: ContextStack | null
+): Array<{ value: any; ctxId: string }> {
+  const world: any = typeof window !== "undefined" ? window : global;
   const idMap = world[TUMAU_DEBUG] || new Map<any, string>();
   if (!world[TUMAU_DEBUG]) {
     world[TUMAU_DEBUG] = idMap;
@@ -92,7 +100,7 @@ function debugStack(currentStack: ContextStack | null): Array<{ value: any; ctxI
     }
     result.push({
       ctxId,
-      value: stack.provider[CONTEXT].value,
+      value: stack.provider[CONTEXT].value
     });
     if (stack.parent) {
       traverse(stack.parent);
