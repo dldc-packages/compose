@@ -1,41 +1,42 @@
 {
   "name": "miid",
   "version": "1.1.2",
-  "license": "MIT",
-  "author": "Etienne Dldc <e.deladonchamps@gmail.com>",
-  "files": [
-    "dist"
-  ],
-  "main": "dist/index.js",
-  "module": "dist/miid.esm.js",
-  "typings": "dist/index.d.ts",
-  "scripts": {
-    "build": "tsdx build",
-    "start": "tsdx watch",
-    "test": "tsdx test",
-    "test:watch": "tsdx test --watch",
-    "pub": "yarn build && np"
-  },
-  "dependencies": {},
-  "devDependencies": {
-    "@types/jest": "^24.9.0",
-    "np": "^5.2.1",
-    "tsdx": "^0.12.3",
-    "tslib": "^1.10.0",
-    "typescript": "^3.7.5"
-  },
   "description": "A middleware and context system",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/etienne-dldc/miid.git"
-  },
   "keywords": [
     "middleware",
     "context",
     "typescript"
   ],
+  "homepage": "https://github.com/etienne-dldc/miid#readme",
   "bugs": {
     "url": "https://github.com/etienne-dldc/miid/issues"
   },
-  "homepage": "https://github.com/etienne-dldc/miid#readme"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/etienne-dldc/miid.git"
+  },
+  "license": "MIT",
+  "author": "Etienne Dldc <e.deladonchamps@gmail.com>",
+  "main": "dist/index.js",
+  "module": "dist/miid.esm.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdx build",
+    "pub": "yarn build && np",
+    "start": "tsdx watch",
+    "test": "tsdx test --coverage",
+    "test:watch": "tsdx test --watch"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jest": "^25.1.4",
+    "core-js": "3",
+    "np": "^6.2.0",
+    "tsdx": "^0.12.3",
+    "tslib": "^1.11.1",
+    "typescript": "^3.8.3"
+  }
 }
