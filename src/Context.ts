@@ -14,7 +14,9 @@ export interface ContextProvider<T, HasDefault extends boolean = boolean> {
   };
 }
 
-export type ContextProviderFn<T, HasDefault extends boolean> = (value: T) => ContextProvider<T, HasDefault>;
+export type ContextProviderFn<T, HasDefault extends boolean> = (
+  value: T
+) => ContextProvider<T, HasDefault>;
 
 // Expose both Provider & Consumer because this way you can expose only one of them
 export interface Context<T, HasDefault extends boolean = boolean> {
@@ -28,7 +30,7 @@ export interface ContextStack {
 }
 
 export const Context = {
-  create: createContext,
+  create: createContext
 };
 
 function createContext<T>(): Context<T, false>;
@@ -37,12 +39,12 @@ function createContext<T>(defaultValue?: T): Context<T, boolean> {
   const Consumer: ContextConsumer<T, any> = {
     [CONTEXT]: {
       hasDefault: defaultValue !== undefined && arguments.length === 2,
-      defaultValue: defaultValue,
-    },
+      defaultValue: defaultValue
+    }
   };
   return {
     Consumer,
-    Provider: value => ({ [CONTEXT]: { value, consumer: Consumer } }),
+    Provider: value => ({ [CONTEXT]: { value, consumer: Consumer } })
   };
 }
 
@@ -54,7 +56,7 @@ export const ContextStack = {
     return [...items].reverse().reduce<ContextStack>((parent, provider) => {
       return {
         provider,
-        parent,
+        parent
       };
     }, stack);
   },
@@ -63,19 +65,19 @@ export const ContextStack = {
     if (stack === null) {
       return {
         found: false,
-        value: null,
+        value: null
       };
     }
     if (stack.provider[CONTEXT].consumer === ctx) {
       return {
         found: true,
-        value: stack.provider[CONTEXT].value,
+        value: stack.provider[CONTEXT].value
       };
     }
     if (stack.parent === null) {
       return {
         found: false,
-        value: null,
+        value: null
       };
     }
     return ContextStack.read(stack.parent, ctx);
@@ -87,5 +89,5 @@ export const ContextStack = {
     }
     const root: ContextStack = { provider: first, parent: null };
     return ContextStack.add(root, ...other);
-  },
+  }
 };

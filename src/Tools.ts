@@ -1,6 +1,6 @@
-import { ContextStack, ContextProvider, ContextConsumer } from "./Context";
-import { CONTEXT, DONE, TUMAU_DEBUG } from "./constants";
-import { MiidError } from "./MiidError";
+import { ContextStack, ContextProvider, ContextConsumer } from './Context';
+import { CONTEXT, DONE, TUMAU_DEBUG } from './constants';
+import { MiidError } from './MiidError';
 
 export type AsyncResult<R> = Promise<R>;
 export type Result<R> = R | AsyncResult<R>;
@@ -18,10 +18,7 @@ export interface Tools<R> {
   [CONTEXT]: ContextStack | null;
   [DONE]: Done<R>;
   next: Next<R>;
-  withContext: (
-    first: ContextProvider<any>,
-    ...contexts: Array<ContextProvider<any>>
-  ) => Tools<R>;
+  withContext: (first: ContextProvider<any>, ...contexts: Array<ContextProvider<any>>) => Tools<R>;
   hasContext: (ctx: ContextConsumer<any, any>) => boolean;
   readContext: <T, HasDefault extends boolean>(
     ctx: ContextConsumer<T, HasDefault>
@@ -78,10 +75,8 @@ function createTools<R>(context: ContextStack | null, done: Done<R>): Tools<R> {
   return tools;
 }
 
-function debugStack(
-  currentStack: ContextStack | null
-): Array<{ value: any; ctxId: string }> {
-  const world: any = typeof window !== "undefined" ? window : global;
+function debugStack(currentStack: ContextStack | null): Array<{ value: any; ctxId: string }> {
+  const world: any = typeof window !== 'undefined' ? window : global;
   const idMap = world[TUMAU_DEBUG] || new Map<any, string>();
   if (!world[TUMAU_DEBUG]) {
     world[TUMAU_DEBUG] = idMap;

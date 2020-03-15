@@ -1,4 +1,4 @@
-import { ContextConsumer } from "./Context";
+import { ContextConsumer } from './Context';
 
 export class MiidError extends Error {
   public constructor(message: string) {

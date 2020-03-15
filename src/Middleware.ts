@@ -1,6 +1,6 @@
-import { Tools, Result, AsyncResult } from "./Tools";
-import { ContextProvider, ContextStack } from "./Context";
-import { MiidError } from "./MiidError";
+import { Tools, Result, AsyncResult } from './Tools';
+import { ContextProvider, ContextStack } from './Context';
+import { MiidError } from './MiidError';
 
 export type Middleware<R> = (tools: Tools<R>) => Result<R>;
 export type Middlewares<R> = Array<Middleware<R>>;
@@ -12,10 +12,7 @@ export const Middleware = {
   provider: createProviderMiddleware
 };
 
-function runMiddleware<R>(
-  middleware: Middleware<R>,
-  done: () => Result<R>
-): AsyncResult<R> {
+function runMiddleware<R>(middleware: Middleware<R>, done: () => Result<R>): AsyncResult<R> {
   return runMiddlewareWithContexts(middleware, [], done);
 }
 
@@ -28,9 +25,7 @@ function runMiddlewareWithContexts<R>(
   return Promise.resolve(middleware(Tools.create(baseStack, done)));
 }
 
-function compose<R>(
-  ...middlewares: Array<Middleware<R> | null>
-): Middleware<R> {
+function compose<R>(...middlewares: Array<Middleware<R> | null>): Middleware<R> {
   const resolved: Array<Middleware<R>> = middlewares.filter(
     (v: Middleware<R> | null): v is Middleware<R> => {
       return v !== null;
@@ -40,15 +35,12 @@ function compose<R>(
   return async function(rootTools): Promise<R> {
     // last called middleware #
     return dispatch(0, Tools.getContext(rootTools));
-    async function dispatch(
-      i: number,
-      context: ContextStack | null
-    ): Promise<R> {
+    async function dispatch(i: number, context: ContextStack | null): Promise<R> {
       const middle = resolved[i];
       if (!middle) {
         return Tools.getDone(rootTools)(context);
       }
-      if (typeof middle !== "function") {
+      if (typeof middle !== 'function') {
         throw new MiidError.InvalidMiddleware(middle);
       }
       const middleTools: Tools<R> = Tools.create(context, nextContext => {

@@ -1,4 +1,4 @@
-# 🏯 Miid [![Build Status](https://travis-ci.org/etienne-dldc/miid.svg?branch=master)](https://travis-ci.org/etienne-dldc/miid) [![](https://badgen.net/bundlephobia/minzip/miid)](https://bundlephobia.com/result?p=miid)
+# 🏯 Miid [![Build Status](https://travis-ci.org/etienne-dldc/miid.svg?branch=master)](https://travis-ci.org/etienne-dldc/miid) [![](https://badgen.net/bundlephobia/minzip/miid)](https://bundlephobia.com/result?p=miid) [![codecov](https://codecov.io/gh/etienne-dldc/miid/branch/master/graph/badge.svg)](https://codecov.io/gh/etienne-dldc/miid)
 
 > A middleware and context system
 
@@ -22,42 +22,42 @@ import {
   Done,
   Next,
   Result
-} from "miid";
+} from 'miid';
 ```
 
 ## Example
 
 ```ts
-import { Middleware, Context } from "miid";
+import { Middleware, Context } from 'miid';
 
-const ACtx = Context.create<string>("A");
+const ACtx = Context.create<string>('A');
 
 const mid = Middleware.compose<string>(
   tools => {
-    console.log("middleware 1");
+    console.log('middleware 1');
     console.log((tools as any).debug());
-    return tools.withContext(ACtx.Provider("a1")).next();
+    return tools.withContext(ACtx.Provider('a1')).next();
   },
   tools => {
-    console.log("middleware 2");
+    console.log('middleware 2');
     console.log((tools as any).debug());
-    return tools.withContext(ACtx.Provider("a2")).next();
+    return tools.withContext(ACtx.Provider('a2')).next();
   },
   tools => {
-    console.log("middleware 3");
+    console.log('middleware 3');
     console.log(tools.readContext(ACtx.Consumer));
     console.log((tools as any).debug());
-    return tools.withContext(ACtx.Provider("a3")).next();
+    return tools.withContext(ACtx.Provider('a3')).next();
   }
 );
 const mid2 = Middleware.compose(mid, async tools => {
-  console.log("done");
+  console.log('done');
   console.log((tools as any).debug());
   return tools.next();
 });
 Middleware.run(mid2, () => {
-  console.log("done 2");
-  return "nope2";
+  console.log('done 2');
+  return 'nope2';
 }).then(res => {
   console.log({ res });
 });

@@ -25,6 +25,7 @@
   ],
   "scripts": {
     "build": "tsdx build",
+    "codecov": "codecov",
     "pub": "yarn build && np",
     "start": "tsdx watch",
     "test": "tsdx test --coverage",
@@ -33,6 +34,7 @@
   "dependencies": {},
   "devDependencies": {
     "@types/jest": "^25.1.4",
+    "codecov": "^3.6.5",
     "core-js": "3",
     "np": "^6.2.0",
     "tsdx": "^0.12.3",
