@@ -24,11 +24,6 @@ export interface Context<T, HasDefault extends boolean = boolean> {
   Provider: ContextProviderFn<T, HasDefault>;
 }
 
-export interface ContextStack {
-  provider: ContextProvider<any>;
-  parent: null | ContextStack;
-}
-
 export const Context = {
   create: createContext
 };
@@ -38,7 +33,7 @@ function createContext<T>(defaultValue: T): Context<T, true>;
 function createContext<T>(defaultValue?: T): Context<T, boolean> {
   const Consumer: ContextConsumer<T, any> = {
     [CONTEXT]: {
-      hasDefault: defaultValue !== undefined && arguments.length === 2,
+      hasDefault: defaultValue !== undefined && arguments.length > 0,
       defaultValue: defaultValue
     }
   };
@@ -47,47 +42,3 @@ function createContext<T>(defaultValue?: T): Context<T, boolean> {
     Provider: value => ({ [CONTEXT]: { value, consumer: Consumer } })
   };
 }
-
-export const ContextStack = {
-  add(stack: ContextStack, ...items: Array<ContextProvider<any>>): ContextStack {
-    if (items.length === 0) {
-      return stack;
-    }
-    return [...items].reverse().reduce<ContextStack>((parent, provider) => {
-      return {
-        provider,
-        parent
-      };
-    }, stack);
-  },
-
-  read(stack: ContextStack | null, ctx: ContextConsumer<any, any>): { found: boolean; value: any } {
-    if (stack === null) {
-      return {
-        found: false,
-        value: null
-      };
-    }
-    if (stack.provider[CONTEXT].consumer === ctx) {
-      return {
-        found: true,
-        value: stack.provider[CONTEXT].value
-      };
-    }
-    if (stack.parent === null) {
-      return {
-        found: false,
-        value: null
-      };
-    }
-    return ContextStack.read(stack.parent, ctx);
-  },
-  create(...items: Array<ContextProvider<any>>): ContextStack | null {
-    const [first, ...other] = items;
-    if (!first) {
-      return null;
-    }
-    const root: ContextStack = { provider: first, parent: null };
-    return ContextStack.add(root, ...other);
-  }
-};

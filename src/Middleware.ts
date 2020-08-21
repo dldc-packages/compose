@@ -1,15 +1,18 @@
-import { Tools, Result, AsyncResult } from './Tools';
-import { ContextProvider, ContextStack } from './Context';
+import { ContextStack } from './ContextStack';
 import { MiidError } from './MiidError';
+import { ContextProvider } from './Context';
 
-export type Middleware<R> = (tools: Tools<R>) => Result<R>;
+export type Next<R> = (ctx: ContextStack) => Result<R>;
+export type Middleware<R> = (ctx: ContextStack, next: Next<R>) => Result<R>;
 export type Middlewares<R> = Array<Middleware<R>>;
+export type AsyncResult<R> = Promise<R>;
+export type Result<R> = R | AsyncResult<R>;
 
 export const Middleware = {
   compose,
   run: runMiddleware,
-  runWithContexts: runMiddlewareWithContexts,
-  provider: createProviderMiddleware
+  runWithContexts: runMiddlewareWithContexts
+  // provider: createProviderMiddleware
 };
 
 function runMiddleware<R>(middleware: Middleware<R>, done: () => Result<R>): AsyncResult<R> {
@@ -21,8 +24,8 @@ function runMiddlewareWithContexts<R>(
   contexts: Array<ContextProvider<any>>,
   done: () => Result<R>
 ): AsyncResult<R> {
-  const baseStack = ContextStack.create(...contexts);
-  return Promise.resolve(middleware(Tools.create(baseStack, done)));
+  const baseStack = ContextStack.createEmpty().withContext(...contexts);
+  return Promise.resolve(middleware(baseStack, done));
 }
 
 function compose<R>(...middlewares: Array<Middleware<R> | null>): Middleware<R> {
@@ -31,32 +34,23 @@ function compose<R>(...middlewares: Array<Middleware<R> | null>): Middleware<R> 
       return v !== null;
     }
   );
+  resolved.forEach((middle, index) => {
+    if (typeof middle !== 'function') {
+      throw new MiidError.InvalidMiddleware(middle, `Not a function at index ${index}`);
+    }
+  });
 
-  return async function(rootTools): Promise<R> {
+  return async function(ctx, next): Promise<R> {
     // last called middleware #
-    return dispatch(0, Tools.getContext(rootTools));
-    async function dispatch(i: number, context: ContextStack | null): Promise<R> {
+    return dispatch(0, ctx);
+    async function dispatch(i: number, context: ContextStack): Promise<R> {
       const middle = resolved[i];
       if (!middle) {
-        return Tools.getDone(rootTools)(context);
+        return next(context);
       }
-      if (typeof middle !== 'function') {
-        throw new MiidError.InvalidMiddleware(middle);
-      }
-      const middleTools: Tools<R> = Tools.create(context, nextContext => {
-        return dispatch(i + 1, nextContext);
-      });
-      const result = middle(middleTools);
+      const result = middle(context, ctx => dispatch(i + 1, ctx));
       const res = await Promise.resolve<R>(result);
-      // maybe we should validate that res is either null or an instance of TumauResponse
       return res;
     }
   };
-}
-
-function createProviderMiddleware<R>(
-  first: ContextProvider<any>,
-  ...contexts: Array<ContextProvider<any>>
-): Middleware<R> {
-  return tools => tools.withContext(first, ...contexts).next();
 }

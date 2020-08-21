@@ -11,8 +11,8 @@ export class MiidError extends Error {
 }
 
 class InvalidMiddleware extends MiidError {
-  constructor(public middleware: any) {
-    super(`Invalid middleware`);
+  constructor(public middleware: any, infos?: string) {
+    super(`Invalid middleware${infos ? ': ' + infos : ''}`);
   }
 }
 

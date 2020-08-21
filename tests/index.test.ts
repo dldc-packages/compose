@@ -1,4 +1,4 @@
-import { Middleware, Context } from '../src';
+import { Middleware, Context, ContextStack, MiidError } from '../src';
 
 test('compose', async () => {
   const ACtx = Context.create<string>('A');
@@ -6,24 +6,24 @@ test('compose', async () => {
   const mock = jest.fn();
 
   const mid = Middleware.compose<string>(
-    tools => {
+    (ctx, next) => {
       mock('middleware 1');
-      return tools.withContext(ACtx.Provider('a1')).next();
+      return next(ctx.withContext(ACtx.Provider('a1')));
     },
-    tools => {
+    (ctx, next) => {
       mock('middleware 2');
-      return tools.withContext(ACtx.Provider('a2')).next();
+      return next(ctx.withContext(ACtx.Provider('a2')));
     },
-    tools => {
+    (ctx, next) => {
       mock('middleware 3');
-      mock(tools.readContext(ACtx.Consumer));
-      return tools.withContext(ACtx.Provider('a3')).next();
+      mock(ctx.readContext(ACtx.Consumer));
+      return next(ctx.withContext(ACtx.Provider('a3')));
     }
   );
 
-  const mid2 = Middleware.compose(mid, async tools => {
+  const mid2 = Middleware.compose(mid, async (ctx, next) => {
     mock('done');
-    return tools.next();
+    return next(ctx);
   });
 
   const res = await Middleware.run(mid2, () => {
@@ -40,4 +40,33 @@ test('compose', async () => {
     ['done 2']
   ]);
   expect(res).toBe('nope2');
+});
+
+test('create empty stack', () => {
+  expect(ContextStack.createEmpty()).toBeInstanceOf(ContextStack);
+});
+
+test('Compose should throw on invalid middleware type', () => {
+  const composed = () => Middleware.compose({} as any);
+  expect(() => Middleware.run(composed, () => null)).toThrow(MiidError.InvalidMiddleware);
+});
+
+test('Debug context', () => {
+  const ACtx = Context.create<string>('A');
+  const BCtx = Context.create<string>('B');
+  const ctx = ContextStack.createEmpty().withContext(
+    ACtx.Provider('a1'),
+    BCtx.Provider('b1'),
+    ACtx.Provider('a2')
+  );
+  expect(ctx.debug()).toMatchObject([{ value: 'a1' }, { value: 'b1' }, { value: 'a2' }]);
+});
+
+test('Read context or fail', () => {
+  const ACtx = Context.create<string>('A');
+  const BCtx = Context.create<string>();
+  const ctx = ContextStack.createEmpty().withContext(ACtx.Provider('a1'));
+  expect(() => ctx.readContextOrFail(ACtx.Consumer)).not.toThrow();
+  expect(() => ctx.readContextOrFail(BCtx.Consumer)).toThrow();
+  expect(() => ContextStack.createEmpty().readContextOrFail(ACtx.Consumer)).not.toThrow();
 });
