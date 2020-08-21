@@ -14,12 +14,12 @@ import {
   Middleware,
   Context,
   ContextStack,
-  Tools,
-  Middlewares,
+  MiidError,
+  AsyncResult,
+  ContextConsumer,
   ContextProvider,
   ContextProviderFn,
-  ContextConsumer,
-  Done,
+  Middlewares,
   Next,
   Result
 } from 'miid';
@@ -33,27 +33,27 @@ import { Middleware, Context } from 'miid';
 const ACtx = Context.create<string>('A');
 
 const mid = Middleware.compose<string>(
-  tools => {
+  (ctx, next) => {
     console.log('middleware 1');
-    console.log((tools as any).debug());
-    return tools.withContext(ACtx.Provider('a1')).next();
+    console.log(ctx.debug());
+    return next(ctx.withContext(ACtx.Provider('a1')));
   },
-  tools => {
+  (ctx, next) => {
     console.log('middleware 2');
-    console.log((tools as any).debug());
-    return tools.withContext(ACtx.Provider('a2')).next();
+    console.log(ctx.debug());
+    return next(ctx.withContext(ACtx.Provider('a2')));
   },
-  tools => {
+  (ctx, next) => {
     console.log('middleware 3');
-    console.log(tools.readContext(ACtx.Consumer));
-    console.log((tools as any).debug());
-    return tools.withContext(ACtx.Provider('a3')).next();
+    console.log(ctx.readContext(ACtx.Consumer));
+    console.log(ctx.debug());
+    return next(ctx.withContext(ACtx.Provider('a3')));
   }
 );
-const mid2 = Middleware.compose(mid, async tools => {
+const mid2 = Middleware.compose(mid, async (ctx, next) => {
   console.log('done');
-  console.log((tools as any).debug());
-  return tools.next();
+  console.log(ctx.debug());
+  return next(ctx);
 });
 Middleware.run(mid2, () => {
   console.log('done 2');
