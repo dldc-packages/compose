@@ -36,18 +36,18 @@ const mid = Middleware.compose<string>(
   (ctx, next) => {
     console.log('middleware 1');
     console.log(ctx.debug());
-    return next(ctx.withContext(ACtx.Provider('a1')));
+    return next(ctx.with(ACtx.Provider('a1')));
   },
   (ctx, next) => {
     console.log('middleware 2');
     console.log(ctx.debug());
-    return next(ctx.withContext(ACtx.Provider('a2')));
+    return next(ctx.with(ACtx.Provider('a2')));
   },
   (ctx, next) => {
     console.log('middleware 3');
-    console.log(ctx.readContext(ACtx.Consumer));
+    console.log(ctx.read(ACtx.Consumer));
     console.log(ctx.debug());
-    return next(ctx.withContext(ACtx.Provider('a3')));
+    return next(ctx.with(ACtx.Provider('a3')));
   }
 );
 const mid2 = Middleware.compose(mid, async (ctx, next) => {

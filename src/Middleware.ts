@@ -24,7 +24,7 @@ function runMiddlewareWithContexts<R>(
   contexts: Array<ContextProvider<any>>,
   done: () => Result<R>
 ): AsyncResult<R> {
-  const baseStack = ContextStack.createEmpty().withContext(...contexts);
+  const baseStack = ContextStack.createEmpty().with(...contexts);
   return Promise.resolve(middleware(baseStack, done));
 }
 

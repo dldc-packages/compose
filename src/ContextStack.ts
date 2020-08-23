@@ -1,9 +1,8 @@
 import { ContextProvider, ContextConsumer } from './Context';
-import { MIID_DEBUG, CONTEXT, IS_STACK } from './constants';
+import { MIID_DEBUG, CONTEXT } from './constants';
 import { MiidError } from './MiidError';
 
 export class ContextStack {
-  [IS_STACK] = true;
   private [CONTEXT]: { provider: ContextProvider<any>; parent: null | ContextStack } | null;
 
   static createEmpty(): ContextStack {
@@ -20,7 +19,7 @@ export class ContextStack {
     }
   }
 
-  private read(ctx: ContextConsumer<any, any>): { found: boolean; value: any } {
+  private readInternal(ctx: ContextConsumer<any, any>): { found: boolean; value: any } {
     const context = this[CONTEXT];
     if (context === null) {
       return {
@@ -40,10 +39,10 @@ export class ContextStack {
         value: null
       };
     }
-    return context.parent.read(ctx);
+    return context.parent.readInternal(ctx);
   }
 
-  withContext(...contexts: Array<ContextProvider<any>>): ContextStack {
+  with(...contexts: Array<ContextProvider<any>>): ContextStack {
     if (contexts.length === 0) {
       return this;
     }
@@ -52,14 +51,14 @@ export class ContextStack {
     }, this);
   }
 
-  hasContext(ctx: ContextConsumer<any, any>): boolean {
-    return this.read(ctx).found;
+  has(ctx: ContextConsumer<any, any>): boolean {
+    return this.readInternal(ctx).found;
   }
 
-  readContext<T, HasDefault extends boolean>(
+  get<T, HasDefault extends boolean>(
     ctx: ContextConsumer<T, HasDefault>
   ): HasDefault extends true ? T : T | null {
-    const res = this.read(ctx);
+    const res = this.readInternal(ctx);
     if (res.found === false) {
       if (ctx[CONTEXT].hasDefault) {
         return ctx[CONTEXT].defaultValue as any;
@@ -69,8 +68,8 @@ export class ContextStack {
     return res.value;
   }
 
-  readContextOrFail<T>(ctx: ContextConsumer<T>): T {
-    const res = this.read(ctx);
+  getOrFail<T>(ctx: ContextConsumer<T>): T {
+    const res = this.readInternal(ctx);
     if (res.found === false) {
       console.log(ctx);
       if (ctx[CONTEXT].hasDefault) {
