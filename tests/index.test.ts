@@ -8,16 +8,16 @@ test('compose', async () => {
   const mid = Middleware.compose<string>(
     (ctx, next) => {
       mock('middleware 1');
-      return next(ctx.withContext(ACtx.Provider('a1')));
+      return next(ctx.with(ACtx.Provider('a1')));
     },
     (ctx, next) => {
       mock('middleware 2');
-      return next(ctx.withContext(ACtx.Provider('a2')));
+      return next(ctx.with(ACtx.Provider('a2')));
     },
     (ctx, next) => {
       mock('middleware 3');
-      mock(ctx.readContext(ACtx.Consumer));
-      return next(ctx.withContext(ACtx.Provider('a3')));
+      mock(ctx.get(ACtx.Consumer));
+      return next(ctx.with(ACtx.Provider('a3')));
     }
   );
 
@@ -54,7 +54,7 @@ test('Compose should throw on invalid middleware type', () => {
 test('Debug context', () => {
   const ACtx = Context.create<string>('A');
   const BCtx = Context.create<string>('B');
-  const ctx = ContextStack.createEmpty().withContext(
+  const ctx = ContextStack.createEmpty().with(
     ACtx.Provider('a1'),
     BCtx.Provider('b1'),
     ACtx.Provider('a2')
@@ -65,8 +65,8 @@ test('Debug context', () => {
 test('Read context or fail', () => {
   const ACtx = Context.create<string>('A');
   const BCtx = Context.create<string>();
-  const ctx = ContextStack.createEmpty().withContext(ACtx.Provider('a1'));
-  expect(() => ctx.readContextOrFail(ACtx.Consumer)).not.toThrow();
-  expect(() => ctx.readContextOrFail(BCtx.Consumer)).toThrow();
-  expect(() => ContextStack.createEmpty().readContextOrFail(ACtx.Consumer)).not.toThrow();
+  const ctx = ContextStack.createEmpty().with(ACtx.Provider('a1'));
+  expect(() => ctx.getOrFail(ACtx.Consumer)).not.toThrow();
+  expect(() => ctx.getOrFail(BCtx.Consumer)).toThrow();
+  expect(() => ContextStack.createEmpty().getOrFail(ACtx.Consumer)).not.toThrow();
 });
