@@ -62,11 +62,42 @@ test('Debug context', () => {
   expect(ctx.debug()).toMatchObject([{ value: 'a1' }, { value: 'b1' }, { value: 'a2' }]);
 });
 
-test('Read context or fail', () => {
-  const ACtx = Context.create<string>('A');
-  const BCtx = Context.create<string>();
-  const ctx = ContextStack.createEmpty().with(ACtx.Provider('a1'));
-  expect(() => ctx.getOrFail(ACtx.Consumer)).not.toThrow();
-  expect(() => ctx.getOrFail(BCtx.Consumer)).toThrow();
-  expect(() => ContextStack.createEmpty().getOrFail(ACtx.Consumer)).not.toThrow();
+describe('ContextStack', () => {
+  test('ContextStack.createEmpty', () => {
+    expect(ContextStack.createEmpty()).toBeInstanceOf(ContextStack);
+  });
+
+  test(`Creating a ContextStack with a provider but no parent throws`, () => {
+    const Ctx = Context.create<string>();
+    expect(() => new (ContextStack as any)(Ctx.Provider(''))).toThrow();
+  });
+
+  test('Context with default', () => {
+    const CtxWithDefault = Context.create<string>('DEFAULT');
+    const emptyCtx = ContextStack.createEmpty();
+    expect(emptyCtx.get(CtxWithDefault.Consumer)).toBe('DEFAULT');
+    expect(emptyCtx.getOrFail(CtxWithDefault.Consumer)).toBe('DEFAULT');
+    expect(emptyCtx.has(CtxWithDefault.Consumer)).toBe(false);
+    const ctx = emptyCtx.with(CtxWithDefault.Provider('A'));
+    expect(ctx.get(CtxWithDefault.Consumer)).toBe('A');
+    expect(ctx.getOrFail(CtxWithDefault.Consumer)).toBe('A');
+    expect(ctx.has(CtxWithDefault.Consumer)).toBe(true);
+    const OtherCtx = Context.create<string>();
+    const otherCtx = emptyCtx.with(OtherCtx.Provider('other'));
+    expect(otherCtx.get(CtxWithDefault.Consumer)).toBe('DEFAULT');
+    expect(otherCtx.getOrFail(CtxWithDefault.Consumer)).toBe('DEFAULT');
+    expect(otherCtx.has(CtxWithDefault.Consumer)).toBe(false);
+  });
+
+  test('Context without default', () => {
+    const CtxNoDefault = Context.create<string>();
+    const emptyCtx = ContextStack.createEmpty();
+    expect(emptyCtx.get(CtxNoDefault.Consumer)).toBe(null);
+    expect(() => emptyCtx.getOrFail(CtxNoDefault.Consumer)).toThrow();
+    expect(emptyCtx.has(CtxNoDefault.Consumer)).toBe(false);
+    const ctx = emptyCtx.with(CtxNoDefault.Provider('A'));
+    expect(ctx.get(CtxNoDefault.Consumer)).toBe('A');
+    expect(ctx.getOrFail(CtxNoDefault.Consumer)).toBe('A');
+    expect(ctx.has(CtxNoDefault.Consumer)).toBe(true);
+  });
 });

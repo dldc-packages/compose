@@ -3,23 +3,26 @@ import { MIID_DEBUG, CONTEXT } from './constants';
 import { MiidError } from './MiidError';
 
 export class ContextStack {
-  private [CONTEXT]: { provider: ContextProvider<any>; parent: null | ContextStack } | null;
+  private [CONTEXT]: { provider: ContextProvider<any>; parent: ContextStack } | null;
 
   static createEmpty(): ContextStack {
     return new ContextStack();
   }
 
   private constructor();
-  private constructor(provider: ContextProvider<any>, parent: null | ContextStack);
-  private constructor(provider?: ContextProvider<any>, parent: null | ContextStack = null) {
+  private constructor(provider: ContextProvider<any>, parent: ContextStack);
+  private constructor(provider?: ContextProvider<any>, parent?: ContextStack) {
     if (provider) {
+      if (!parent) {
+        throw new Error(`Invalid ContextStack arguments`);
+      }
       this[CONTEXT] = { provider, parent };
     } else {
       this[CONTEXT] = null;
     }
   }
 
-  private readInternal(ctx: ContextConsumer<any, any>): { found: boolean; value: any } {
+  private readInternal(consumer: ContextConsumer<any, any>): { found: boolean; value: any } {
     const context = this[CONTEXT];
     if (context === null) {
       return {
@@ -27,19 +30,13 @@ export class ContextStack {
         value: null
       };
     }
-    if (context.provider[CONTEXT].consumer === ctx) {
+    if (context.provider[CONTEXT].consumer === consumer) {
       return {
         found: true,
         value: context.provider[CONTEXT].value
       };
     }
-    if (context.parent === null) {
-      return {
-        found: false,
-        value: null
-      };
-    }
-    return context.parent.readInternal(ctx);
+    return context.parent.readInternal(consumer);
   }
 
   with(...contexts: Array<ContextProvider<any>>): ContextStack {
@@ -68,14 +65,13 @@ export class ContextStack {
     return res.value;
   }
 
-  getOrFail<T>(ctx: ContextConsumer<T>): T {
-    const res = this.readInternal(ctx);
+  getOrFail<T>(consumer: ContextConsumer<T>): T {
+    const res = this.readInternal(consumer);
     if (res.found === false) {
-      console.log(ctx);
-      if (ctx[CONTEXT].hasDefault) {
-        return ctx[CONTEXT].defaultValue as any;
+      if (consumer[CONTEXT].hasDefault) {
+        return consumer[CONTEXT].defaultValue as any;
       }
-      throw new MiidError.MissingContext(ctx);
+      throw new MiidError.MissingContext(consumer);
     }
     return res.value;
   }
