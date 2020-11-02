@@ -24,21 +24,17 @@ export interface Context<T, HasDefault extends boolean = boolean> {
   Provider: ContextProviderFn<T, HasDefault>;
 }
 
-export const Context = {
-  create: createContext
-};
-
-function createContext<T>(): Context<T, false>;
-function createContext<T>(defaultValue: T): Context<T, true>;
-function createContext<T>(defaultValue?: T): Context<T, boolean> {
+export function createContext<T>(): Context<T, false>;
+export function createContext<T>(defaultValue: T): Context<T, true>;
+export function createContext<T>(defaultValue?: T): Context<T, boolean> {
   const Consumer: ContextConsumer<T, any> = {
     [CONTEXT]: {
       hasDefault: defaultValue !== undefined && arguments.length > 0,
-      defaultValue: defaultValue
-    }
+      defaultValue: defaultValue,
+    },
   };
   return {
     Consumer,
-    Provider: value => ({ [CONTEXT]: { value, consumer: Consumer } })
+    Provider: (value) => ({ [CONTEXT]: { value, consumer: Consumer } }),
   };
 }

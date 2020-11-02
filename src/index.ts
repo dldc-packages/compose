@@ -1,4 +1,19 @@
-export { Middleware, Middlewares, AsyncResult, Next, Result } from './Middleware';
+export {
+  Middleware,
+  Middlewares,
+  AsyncResult,
+  Next,
+  Result,
+  compose,
+  runMiddleware,
+  runMiddlewareWithContexts,
+} from './Middleware';
 export { ContextStack } from './ContextStack';
-export { Context, ContextProvider, ContextConsumer, ContextProviderFn } from './Context';
+export {
+  Context,
+  ContextProvider,
+  ContextConsumer,
+  ContextProviderFn,
+  createContext,
+} from './Context';
 export { MiidError } from './MiidError';

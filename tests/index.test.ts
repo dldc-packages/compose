@@ -1,11 +1,11 @@
-import { Middleware, Context, ContextStack, MiidError } from '../src';
+import { createContext, ContextStack, MiidError, compose, runMiddleware } from '../src';
 
 test('compose', async () => {
-  const ACtx = Context.create<string>('A');
+  const ACtx = createContext<string>('A');
 
   const mock = jest.fn();
 
-  const mid = Middleware.compose<string>(
+  const mid = compose<string>(
     (ctx, next) => {
       mock('middleware 1');
       return next(ctx.with(ACtx.Provider('a1')));
@@ -21,12 +21,12 @@ test('compose', async () => {
     }
   );
 
-  const mid2 = Middleware.compose(mid, async (ctx, next) => {
+  const mid2 = compose(mid, async (ctx, next) => {
     mock('done');
     return next(ctx);
   });
 
-  const res = await Middleware.run(mid2, () => {
+  const res = await runMiddleware(mid2, () => {
     mock('done 2');
     return 'nope2';
   });
@@ -37,7 +37,7 @@ test('compose', async () => {
     ['middleware 3'],
     ['a2'],
     ['done'],
-    ['done 2']
+    ['done 2'],
   ]);
   expect(res).toBe('nope2');
 });
@@ -47,13 +47,13 @@ test('create empty stack', () => {
 });
 
 test('Compose should throw on invalid middleware type', () => {
-  const composed = () => Middleware.compose({} as any);
-  expect(() => Middleware.run(composed, () => null)).toThrow(MiidError.InvalidMiddleware);
+  const composed = () => compose({} as any);
+  expect(() => runMiddleware(composed, () => null)).toThrow(MiidError.InvalidMiddleware);
 });
 
 test('Debug context', () => {
-  const ACtx = Context.create<string>('A');
-  const BCtx = Context.create<string>('B');
+  const ACtx = createContext<string>('A');
+  const BCtx = createContext<string>('B');
   const ctx = ContextStack.createEmpty().with(
     ACtx.Provider('a1'),
     BCtx.Provider('b1'),
@@ -68,12 +68,12 @@ describe('ContextStack', () => {
   });
 
   test(`Creating a ContextStack with a provider but no parent throws`, () => {
-    const Ctx = Context.create<string>();
+    const Ctx = createContext<string>();
     expect(() => new (ContextStack as any)(Ctx.Provider(''))).toThrow();
   });
 
   test('Context with default', () => {
-    const CtxWithDefault = Context.create<string>('DEFAULT');
+    const CtxWithDefault = createContext<string>('DEFAULT');
     const emptyCtx = ContextStack.createEmpty();
     expect(emptyCtx.get(CtxWithDefault.Consumer)).toBe('DEFAULT');
     expect(emptyCtx.getOrFail(CtxWithDefault.Consumer)).toBe('DEFAULT');
@@ -82,7 +82,7 @@ describe('ContextStack', () => {
     expect(ctx.get(CtxWithDefault.Consumer)).toBe('A');
     expect(ctx.getOrFail(CtxWithDefault.Consumer)).toBe('A');
     expect(ctx.has(CtxWithDefault.Consumer)).toBe(true);
-    const OtherCtx = Context.create<string>();
+    const OtherCtx = createContext<string>();
     const otherCtx = emptyCtx.with(OtherCtx.Provider('other'));
     expect(otherCtx.get(CtxWithDefault.Consumer)).toBe('DEFAULT');
     expect(otherCtx.getOrFail(CtxWithDefault.Consumer)).toBe('DEFAULT');
@@ -90,7 +90,7 @@ describe('ContextStack', () => {
   });
 
   test('Context without default', () => {
-    const CtxNoDefault = Context.create<string>();
+    const CtxNoDefault = createContext<string>();
     const emptyCtx = ContextStack.createEmpty();
     expect(emptyCtx.get(CtxNoDefault.Consumer)).toBe(null);
     expect(() => emptyCtx.getOrFail(CtxNoDefault.Consumer)).toThrow();
