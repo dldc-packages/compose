@@ -40,6 +40,9 @@
     "tslib": "^2.0.1",
     "typescript": "^3.9.7"
   },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
   "np": {
     "yarn": false,
     "cleanup": false
