@@ -41,7 +41,6 @@
     "typescript": "^3.9.7"
   },
   "np": {
-    "yarn": true,
     "cleanup": false
   }
 }
