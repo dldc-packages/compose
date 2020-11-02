@@ -31,8 +31,8 @@
     "test": "tsdx test --coverage",
     "test:watch": "tsdx test --watch"
   },
-  "dependencies": {},
   "devDependencies": {
+    "@changesets/cli": "^2.11.2",
     "@types/jest": "^26.0.13",
     "codecov": "^3.7.2",
     "core-js": "3.6.5",
