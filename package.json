@@ -20,17 +20,18 @@
   "main": "dist/index.js",
   "module": "dist/miid.esm.js",
   "typings": "dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsdx build",
     "codecov": "codecov",
-    "pub": "yarn build && np",
+    "pub": "yarn build && np --no-cleanup",
     "start": "tsdx watch",
     "test": "tsdx test --coverage",
     "test:watch": "tsdx test --watch"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.11.2",
     "@types/jest": "^26.0.13",
     "codecov": "^3.7.2",
     "core-js": "3.6.5",
