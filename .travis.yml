@@ -12,4 +12,4 @@ before_install:
 install:
   - pnpm install
 after_success:
-  - yarn run codecov
+  - pnpm run codecov
