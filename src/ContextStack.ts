@@ -9,6 +9,10 @@ export class ContextStack {
     return new ContextStack();
   }
 
+  static createFrom(...contexts: Array<ContextProvider<any>>): ContextStack {
+    return ContextStack.createEmpty().with(...contexts);
+  }
+
   private constructor();
   private constructor(provider: ContextProvider<any>, parent: ContextStack);
   private constructor(provider?: ContextProvider<any>, parent?: ContextStack) {
@@ -27,13 +31,13 @@ export class ContextStack {
     if (context === null) {
       return {
         found: false,
-        value: null
+        value: null,
       };
     }
     if (context.provider[CONTEXT].consumer === consumer) {
       return {
         found: true,
-        value: context.provider[CONTEXT].value
+        value: context.provider[CONTEXT].value,
       };
     }
     return context.parent.readInternal(consumer);
@@ -90,14 +94,12 @@ export class ContextStack {
       }
       let ctxId = idMap.get(context.provider[CONTEXT].consumer);
       if (ctxId === undefined) {
-        ctxId = Math.random()
-          .toString(36)
-          .substring(7);
+        ctxId = Math.random().toString(36).substring(7);
         idMap.set(context.provider[CONTEXT].consumer, ctxId);
       }
       result.push({
         ctxId,
-        value: context.provider[CONTEXT].value
+        value: context.provider[CONTEXT].value,
       });
       if (context.parent) {
         traverse(context.parent);

@@ -1,11 +1,13 @@
-import { createContext, ContextStack, MiidError, compose, runMiddleware } from '../src';
+import { createContext, ContextStack, MiidError, compose } from '../src';
+
+type MaybeAsync<T> = T | Promise<T>;
 
 test('compose', async () => {
   const ACtx = createContext<string>('A');
 
   const mock = jest.fn();
 
-  const mid = compose<string>(
+  const mid = compose<MaybeAsync<string>>(
     (ctx, next) => {
       mock('middleware 1');
       return next(ctx.with(ACtx.Provider('a1')));
@@ -26,7 +28,13 @@ test('compose', async () => {
     return next(ctx);
   });
 
-  const res = await runMiddleware(mid2, () => {
+  const mid3 = compose(mid2, async (ctx, next) => {
+    const tmp = await Promise.resolve(next(ctx));
+    mock('tmp ' + tmp);
+    return tmp;
+  });
+
+  const res = await mid3(ContextStack.createEmpty(), () => {
     mock('done 2');
     return 'nope2';
   });
@@ -38,6 +46,7 @@ test('compose', async () => {
     ['a2'],
     ['done'],
     ['done 2'],
+    ['tmp nope2'],
   ]);
   expect(res).toBe('nope2');
 });
@@ -47,8 +56,7 @@ test('create empty stack', () => {
 });
 
 test('Compose should throw on invalid middleware type', () => {
-  const composed = () => compose({} as any);
-  expect(() => runMiddleware(composed, () => null)).toThrow(MiidError.InvalidMiddleware);
+  expect(() => compose({} as any)).toThrow(MiidError.InvalidMiddleware);
 });
 
 test('Debug context', () => {
@@ -70,6 +78,12 @@ describe('ContextStack', () => {
   test(`Creating a ContextStack with a provider but no parent throws`, () => {
     const Ctx = createContext<string>();
     expect(() => new (ContextStack as any)(Ctx.Provider(''))).toThrow();
+  });
+
+  test(`Context with 0 should return self`, () => {
+    const Ctx = createContext<string>();
+    const ctx = ContextStack.createFrom(Ctx.Provider(''));
+    expect(ctx.with()).toBe(ctx);
   });
 
   test('Context with default', () => {

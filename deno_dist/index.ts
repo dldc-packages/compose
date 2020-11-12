@@ -1,13 +1,4 @@
-export {
-  Middleware,
-  Middlewares,
-  AsyncResult,
-  Next,
-  Result,
-  compose,
-  runMiddleware,
-  runMiddlewareWithContexts,
-} from './Middleware.ts';
+export { Middleware, Middlewares, Next, compose, composeAdvanced } from './Middleware.ts';
 export { ContextStack } from './ContextStack.ts';
 export {
   Context,

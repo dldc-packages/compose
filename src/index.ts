@@ -1,13 +1,4 @@
-export {
-  Middleware,
-  Middlewares,
-  AsyncResult,
-  Next,
-  Result,
-  compose,
-  runMiddleware,
-  runMiddlewareWithContexts,
-} from './Middleware';
+export { Middleware, Middlewares, Next, compose, composeAdvanced } from './Middleware';
 export { ContextStack } from './ContextStack';
 export {
   Context,
