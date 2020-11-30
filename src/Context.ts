@@ -1,14 +1,17 @@
 import { CONTEXT } from './constants';
 
 export interface ContextConsumer<T, HasDefault extends boolean = boolean> {
-  [CONTEXT]: {
+  readonly name: string;
+  readonly [CONTEXT]: {
     hasDefault: HasDefault;
     defaultValue: T | undefined;
+    help?: string;
   };
 }
 
 export interface ContextProvider<T, HasDefault extends boolean = boolean> {
-  [CONTEXT]: {
+  readonly name: string;
+  readonly [CONTEXT]: {
     consumer: ContextConsumer<T, HasDefault>;
     value: T;
   };
@@ -24,17 +27,28 @@ export interface Context<T, HasDefault extends boolean = boolean> {
   Provider: ContextProviderFn<T, HasDefault>;
 }
 
-export function createContext<T>(): Context<T, false>;
-export function createContext<T>(defaultValue: T): Context<T, true>;
-export function createContext<T>(defaultValue?: T): Context<T, boolean> {
+export function createContext<T>(options: {
+  name: string;
+  help?: string;
+  defaultValue: T;
+}): Context<T, true>;
+export function createContext<T>(options: { name: string; help?: string }): Context<T, false>;
+export function createContext<T>(options: {
+  name: string;
+  help?: string;
+  defaultValue?: T;
+}): Context<T, boolean> {
+  const { help, name } = options;
   const Consumer: ContextConsumer<T, any> = {
+    name,
     [CONTEXT]: {
-      hasDefault: defaultValue !== undefined && arguments.length > 0,
-      defaultValue: defaultValue,
+      hasDefault: options.defaultValue !== undefined,
+      defaultValue: options.defaultValue,
+      help,
     },
   };
   return {
     Consumer,
-    Provider: (value) => ({ [CONTEXT]: { value, consumer: Consumer } }),
+    Provider: (value) => ({ name, [CONTEXT]: { value, consumer: Consumer } }),
   };
 }

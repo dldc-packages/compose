@@ -2,8 +2,40 @@ import { createContext, ContextStack, MiidError, compose } from '../src';
 
 type MaybeAsync<T> = T | Promise<T>;
 
+test('compile README example', () => {
+  const ACtx = createContext<string>({ name: 'ACtx', defaultValue: 'A' });
+
+  const mid = compose<string>(
+    (ctx, next) => {
+      console.log('middleware 1');
+      console.log(ctx.debug());
+      return next(ctx.with(ACtx.Provider('a1')));
+    },
+    (ctx, next) => {
+      console.log('middleware 2');
+      console.log(ctx.debug());
+      return next(ctx.with(ACtx.Provider('a2')));
+    },
+    (ctx, next) => {
+      console.log('middleware 3');
+      console.log(ctx.get(ACtx.Consumer));
+      console.log(ctx.debug());
+      return next(ctx.with(ACtx.Provider('a3')));
+    }
+  );
+  const mid2 = compose(mid, (ctx, next) => {
+    console.log('done');
+    console.log(ctx.debug());
+    return next(ctx);
+  });
+  mid2(ContextStack.createEmpty(), () => {
+    console.log('done 2');
+    return 'nope2';
+  });
+});
+
 test('compose', async () => {
-  const ACtx = createContext<string>('A');
+  const ACtx = createContext<string>({ name: 'ACtx', defaultValue: 'A' });
 
   const mock = jest.fn();
 
@@ -60,8 +92,8 @@ test('Compose should throw on invalid middleware type', () => {
 });
 
 test('Debug context', () => {
-  const ACtx = createContext<string>('A');
-  const BCtx = createContext<string>('B');
+  const ACtx = createContext<string>({ name: 'ACtx', defaultValue: 'A' });
+  const BCtx = createContext<string>({ name: 'BCtx', defaultValue: 'B' });
   const ctx = ContextStack.createEmpty().with(
     ACtx.Provider('a1'),
     BCtx.Provider('b1'),
@@ -76,18 +108,21 @@ describe('ContextStack', () => {
   });
 
   test(`Creating a ContextStack with a provider but no parent throws`, () => {
-    const Ctx = createContext<string>();
+    const Ctx = createContext<string>({ name: 'Ctx' });
     expect(() => new (ContextStack as any)(Ctx.Provider(''))).toThrow();
   });
 
   test(`Context with 0 should return self`, () => {
-    const Ctx = createContext<string>();
+    const Ctx = createContext<string>({ name: 'Ctx' });
     const ctx = ContextStack.createFrom(Ctx.Provider(''));
     expect(ctx.with()).toBe(ctx);
   });
 
   test('Context with default', () => {
-    const CtxWithDefault = createContext<string>('DEFAULT');
+    const CtxWithDefault = createContext<string>({
+      name: 'CtxWithDefault',
+      defaultValue: 'DEFAULT',
+    });
     const emptyCtx = ContextStack.createEmpty();
     expect(emptyCtx.get(CtxWithDefault.Consumer)).toBe('DEFAULT');
     expect(emptyCtx.getOrFail(CtxWithDefault.Consumer)).toBe('DEFAULT');
@@ -96,7 +131,7 @@ describe('ContextStack', () => {
     expect(ctx.get(CtxWithDefault.Consumer)).toBe('A');
     expect(ctx.getOrFail(CtxWithDefault.Consumer)).toBe('A');
     expect(ctx.has(CtxWithDefault.Consumer)).toBe(true);
-    const OtherCtx = createContext<string>();
+    const OtherCtx = createContext<string>({ name: 'OtherCtx' });
     const otherCtx = emptyCtx.with(OtherCtx.Provider('other'));
     expect(otherCtx.get(CtxWithDefault.Consumer)).toBe('DEFAULT');
     expect(otherCtx.getOrFail(CtxWithDefault.Consumer)).toBe('DEFAULT');
@@ -104,7 +139,7 @@ describe('ContextStack', () => {
   });
 
   test('Context without default', () => {
-    const CtxNoDefault = createContext<string>();
+    const CtxNoDefault = createContext<string>({ name: 'CtxNoDefault' });
     const emptyCtx = ContextStack.createEmpty();
     expect(emptyCtx.get(CtxNoDefault.Consumer)).toBe(null);
     expect(() => emptyCtx.getOrFail(CtxNoDefault.Consumer)).toThrow();

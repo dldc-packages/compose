@@ -1,3 +1,4 @@
+import { CONTEXT } from './constants.ts';
 import { ContextConsumer } from './Context.ts';
 
 export class MiidError extends Error {
@@ -17,8 +18,12 @@ class InvalidMiddleware extends MiidError {
 }
 
 class MissingContext extends MiidError {
+  public readonly help?: string;
   constructor(public context: ContextConsumer<any>) {
-    super(`Missing Context`);
+    super(
+      `Cannot find context ${context.name}${context[CONTEXT].help ?? '\n' + context[CONTEXT].help}`
+    );
+    this.help = context[CONTEXT].help;
   }
 }
 

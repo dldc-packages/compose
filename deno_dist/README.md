@@ -5,9 +5,9 @@
 ## Example
 
 ```ts
-import { compose, createContext } from 'miid';
+import { compose, createContext, ContextStack } from 'miid';
 
-const ACtx = createContext<string>('A');
+const ACtx = createContext<string>({ name: 'ACtx', defaultValue: 'A' });
 
 const mid = compose<string>(
   (ctx, next) => {
@@ -22,21 +22,19 @@ const mid = compose<string>(
   },
   (ctx, next) => {
     console.log('middleware 3');
-    console.log(ctx.read(ACtx.Consumer));
+    console.log(ctx.get(ACtx.Consumer));
     console.log(ctx.debug());
     return next(ctx.with(ACtx.Provider('a3')));
   }
 );
-const mid2 = compose(mid, async (ctx, next) => {
+const mid2 = compose(mid, (ctx, next) => {
   console.log('done');
   console.log(ctx.debug());
   return next(ctx);
 });
-runMiddleware(mid2, () => {
+mid2(ContextStack.createEmpty(), () => {
   console.log('done 2');
   return 'nope2';
-}).then((res) => {
-  console.log({ res });
 });
 ```
 
