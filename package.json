@@ -34,8 +34,8 @@
   "devDependencies": {
     "@types/jest": "^26.0.15",
     "codecov": "^3.8.1",
-    "core-js": "3.7.0",
-    "denoify": "^0.6.1",
+    "core-js": "3.12.1",
+    "denoify": "^0.7.1",
     "np": "^7.0.0",
     "regenerator-runtime": "^0.13.7",
     "tsdx": "^0.14.1",

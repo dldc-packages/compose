@@ -2,14 +2,5 @@ language: node_js
 node_js:
   - '12'
   - '10'
-cache:
-  npm: false
-  directories:
-    - '~/.pnpm-store'
-before_install:
-  - curl -L https://unpkg.com/@pnpm/self-installer | node
-  - pnpm config set store-dir ~/.pnpm-store
-install:
-  - pnpm install
 after_success:
-  - pnpm run codecov
+  - yarn run codecov
