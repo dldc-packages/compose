@@ -26,7 +26,7 @@
   },
   "main": "./dist/miid.cjs.js",
   "module": "./dist/miid.es.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/mod.d.ts",
   "files": [
     "dist"
   ],
