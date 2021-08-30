@@ -2,6 +2,8 @@ import { ContextProvider, ContextConsumer } from './Context';
 import { MIID_DEBUG, CONTEXT } from './constants';
 import { MiidError } from './MiidError';
 
+declare const window: any;
+
 export class ContextStack {
   private [CONTEXT]: { provider: ContextProvider<any>; parent: ContextStack } | null;
 
@@ -81,7 +83,12 @@ export class ContextStack {
   }
 
   debug(): Array<{ value: any; ctxId: string }> {
-    const world: any = typeof window !== 'undefined' ? window : global;
+    const world: any =
+      typeof globalThis !== undefined
+        ? globalThis
+        : typeof window !== 'undefined'
+        ? window
+        : global;
     const idMap = world[MIID_DEBUG] || new Map<any, string>();
     if (!world[MIID_DEBUG]) {
       world[MIID_DEBUG] = idMap;

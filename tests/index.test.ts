@@ -1,4 +1,4 @@
-import { createContext, ContextStack, MiidError, compose } from '../src';
+import { createContext, ContextStack, MiidError, compose } from '../src/mod';
 
 type MaybeAsync<T> = T | Promise<T>;
 
