@@ -43,5 +43,5 @@ mid2(ContextStack.createEmpty(), () => {
 ```bash
 npm install miid
 # or
-yarn add midd
+yarn add miid
 ```
