@@ -15,9 +15,9 @@ export class ContextStack {
     return ContextStack.createEmpty().with(...contexts);
   }
 
-  private constructor();
-  private constructor(provider: ContextProvider<any>, parent: ContextStack);
-  private constructor(provider?: ContextProvider<any>, parent?: ContextStack) {
+  protected constructor();
+  protected constructor(provider: ContextProvider<any>, parent: ContextStack);
+  protected constructor(provider?: ContextProvider<any>, parent?: ContextStack) {
     if (provider) {
       if (!parent) {
         throw new Error(`Invalid ContextStack arguments`);
