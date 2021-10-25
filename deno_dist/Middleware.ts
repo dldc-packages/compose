@@ -5,10 +5,10 @@ import { MiidError } from './MiidError.ts';
 // T: transformed value (returned by next())
 
 export type Next<I, T> = (input: I) => T;
-export type Middleware<I, O, T extends O> = (input: I, next: Next<I, T>) => O;
-export type Middlewares<I, O, T extends O> = Array<Middleware<I, O, T>>;
+export type Middleware<I, O, T extends O = O> = (input: I, next: Next<I, T>) => O;
+export type Middlewares<I, O, T extends O = O> = Array<Middleware<I, O, T>>;
 
-export function composeAdvanced<I, O, T extends O>(
+export function composeAdvanced<I, O, T extends O = O>(
   transform: (output: O) => T,
   middlewares: Array<Middleware<I, O, T> | null>
 ): Middleware<I, O, T> {
