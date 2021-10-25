@@ -1,37 +1,38 @@
-import { ContextStack } from './ContextStack.ts';
 import { MiidError } from './MiidError.ts';
 
-export type Next<N> = (ctx: ContextStack) => N;
-export type Middleware<R, N = R> = (ctx: ContextStack, next: Next<N>) => R;
-export type Middlewares<R, N = R> = Array<Middleware<R, N>>;
+// I: Input
+// O: Output
+// T: transformed value (returned by next())
 
-export function composeAdvanced<R, N>(
-  transform: (result: R) => N,
-  middlewares: Array<Middleware<R, N> | null>
-): Middleware<N, R> {
-  const resolved: Array<Middleware<R, N>> = middlewares.filter(
-    (v: Middleware<R, N> | null): v is Middleware<R, N> => {
-      return v !== null;
-    }
-  );
+export type Next<I, T> = (input: I) => T;
+export type Middleware<I, O, T extends O> = (input: I, next: Next<I, T>) => O;
+export type Middlewares<I, O, T extends O> = Array<Middleware<I, O, T>>;
+
+export function composeAdvanced<I, O, T extends O>(
+  transform: (output: O) => T,
+  middlewares: Array<Middleware<I, O, T> | null>
+): Middleware<I, O, T> {
+  const resolved = middlewares.filter((v): v is Middleware<I, O, T> => v !== null);
   resolved.forEach((middle, index) => {
     if (typeof middle !== 'function') {
       throw new MiidError.InvalidMiddleware(middle, `Not a function at index ${index}`);
     }
   });
 
-  return function (ctx, next): N {
+  return function (ctx, next): O {
     return dispatch(0, ctx);
-    function dispatch(i: number, context: ContextStack): N {
-      const middle = resolved[i];
+    function dispatch(index: number, input: I): O {
+      const middle = resolved[index];
       if (!middle) {
-        return transform(next(context));
+        return next(input);
       }
-      return transform(middle(context, (ctx) => dispatch(i + 1, ctx)));
+      return middle(input, (ctx) => transform(dispatch(index + 1, ctx)));
     }
   };
 }
 
-export function compose<R>(...middlewares: Array<Middleware<R> | null>): Middleware<R> {
+export function compose<I, O>(
+  ...middlewares: Array<Middleware<I, O, O> | null>
+): Middleware<I, O, O> {
   return composeAdvanced((v) => v, middlewares);
 }
