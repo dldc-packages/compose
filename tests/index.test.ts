@@ -5,7 +5,7 @@ type MaybeAsync<T> = T | Promise<T>;
 test('compile README example', () => {
   const ACtx = createContext<string>({ name: 'ACtx', defaultValue: 'A' });
 
-  const mid = compose<string>(
+  const mid = compose<ContextStack, string>(
     (ctx, next) => {
       console.log('middleware 1');
       console.log(ctx.debug());
@@ -39,7 +39,7 @@ test('compose', async () => {
 
   const mock = jest.fn();
 
-  const mid = compose<MaybeAsync<string>>(
+  const mid = compose<ContextStack, MaybeAsync<string>>(
     (ctx, next) => {
       mock('middleware 1');
       return next(ctx.with(ACtx.Provider('a1')));
