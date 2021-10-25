@@ -15,8 +15,6 @@ export class ContextStack {
     return ContextStack.createEmpty().with(...contexts);
   }
 
-  protected constructor();
-  protected constructor(provider: ContextProvider<any>, parent: ContextStack);
   protected constructor(provider?: ContextProvider<any>, parent?: ContextStack) {
     if (provider) {
       if (!parent) {
@@ -28,7 +26,7 @@ export class ContextStack {
     }
   }
 
-  private readInternal(consumer: ContextConsumer<any, any>): { found: boolean; value: any } {
+  protected readInternal(consumer: ContextConsumer<any, any>): { found: boolean; value: any } {
     const context = this[CONTEXT];
     if (context === null) {
       return {
