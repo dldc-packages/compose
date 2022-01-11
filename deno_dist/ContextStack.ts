@@ -11,10 +11,6 @@ export class ContextStack {
     return new ContextStack();
   }
 
-  static createFrom(...contexts: Array<ContextProvider<any>>): ContextStack {
-    return ContextStack.createEmpty().with(...contexts);
-  }
-
   protected constructor(provider?: ContextProvider<any>, parent?: ContextStack) {
     if (provider) {
       if (!parent) {
@@ -43,15 +39,6 @@ export class ContextStack {
     return context.parent.readInternal(consumer);
   }
 
-  with(...contexts: Array<ContextProvider<any>>): ContextStack {
-    if (contexts.length === 0) {
-      return this;
-    }
-    return [...contexts].reverse().reduce<ContextStack>((parent, provider) => {
-      return new ContextStack(provider, parent);
-    }, this);
-  }
-
   has(ctx: ContextConsumer<any, any>): boolean {
     return this.readInternal(ctx).found;
   }
@@ -78,6 +65,15 @@ export class ContextStack {
       throw new MiidError.MissingContext(consumer);
     }
     return res.value;
+  }
+
+  with(...contexts: Array<ContextProvider<any>>): this {
+    if (contexts.length === 0) {
+      return this as any;
+    }
+    return [...contexts].reverse().reduce<this>((parent, provider) => {
+      return new (this.constructor as any)(provider, parent);
+    }, this as any);
   }
 
   debug(): Array<{ value: any; ctxId: string }> {
