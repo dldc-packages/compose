@@ -1,29 +1,24 @@
-import { createContext, ContextStack, MiidError, compose, ContextProvider } from '../src/mod';
+import { createKey, MiidError, compose, Stack, StackInternal, KeyProvider } from '../src/mod';
 
 type MaybeAsync<T> = T | Promise<T>;
 
-describe('ContextStack', () => {
-  test('ContextStack.createEmpty', () => {
-    expect(ContextStack.createEmpty()).toBeInstanceOf(ContextStack);
-  });
-
-  test(`Creating a ContextStack with a provider but no parent throws`, () => {
-    const Ctx = createContext<string>({ name: 'Ctx' });
-    expect(() => new (ContextStack as any)(Ctx.Provider(''))).toThrow();
+describe('Stack', () => {
+  test('new Stack()', () => {
+    expect(new Stack()).toBeInstanceOf(Stack);
   });
 
   test(`Context with 0 should return self`, () => {
-    const Ctx = createContext<string>({ name: 'Ctx' });
-    const ctx = ContextStack.createEmpty().with(Ctx.Provider(''));
+    const Ctx = createKey<string>({ name: 'Ctx' });
+    const ctx = new Stack().with(Ctx.Provider(''));
     expect(ctx.with()).toBe(ctx);
   });
 
   test('Context with default', () => {
-    const CtxWithDefault = createContext<string>({
+    const CtxWithDefault = createKey<string>({
       name: 'CtxWithDefault',
       defaultValue: 'DEFAULT',
     });
-    const emptyCtx = ContextStack.createEmpty();
+    const emptyCtx = new Stack();
     expect(emptyCtx.get(CtxWithDefault.Consumer)).toBe('DEFAULT');
     expect(emptyCtx.getOrFail(CtxWithDefault.Consumer)).toBe('DEFAULT');
     expect(emptyCtx.has(CtxWithDefault.Consumer)).toBe(false);
@@ -31,7 +26,7 @@ describe('ContextStack', () => {
     expect(ctx.get(CtxWithDefault.Consumer)).toBe('A');
     expect(ctx.getOrFail(CtxWithDefault.Consumer)).toBe('A');
     expect(ctx.has(CtxWithDefault.Consumer)).toBe(true);
-    const OtherCtx = createContext<string>({ name: 'OtherCtx' });
+    const OtherCtx = createKey<string>({ name: 'OtherCtx' });
     const otherCtx = emptyCtx.with(OtherCtx.Provider('other'));
     expect(otherCtx.get(CtxWithDefault.Consumer)).toBe('DEFAULT');
     expect(otherCtx.getOrFail(CtxWithDefault.Consumer)).toBe('DEFAULT');
@@ -39,8 +34,8 @@ describe('ContextStack', () => {
   });
 
   test('Context without default', () => {
-    const CtxNoDefault = createContext<string>({ name: 'CtxNoDefault' });
-    const emptyCtx = ContextStack.createEmpty();
+    const CtxNoDefault = createKey<string>({ name: 'CtxNoDefault' });
+    const emptyCtx = new Stack();
     expect(emptyCtx.get(CtxNoDefault.Consumer)).toBe(null);
     expect(() => emptyCtx.getOrFail(CtxNoDefault.Consumer)).toThrow();
     expect(emptyCtx.has(CtxNoDefault.Consumer)).toBe(false);
@@ -50,36 +45,53 @@ describe('ContextStack', () => {
     expect(ctx.has(CtxNoDefault.Consumer)).toBe(true);
   });
 
-  test('Custom ContextStack', () => {
-    class CustomContext extends ContextStack {
-      // You need to override createEmpty otherwise it will create ContextStack
-      static createEmpty(): CustomContext {
-        return new CustomContext();
-      }
-
-      // Make the constructor protected because it should not be accessible from outside
-      // It's important to keep the same argument as the original ContextStack, otherwise the `with()` method won't work
-      protected constructor(provider?: ContextProvider<any>, parent?: CustomContext) {
-        super(provider, parent);
+  test('Custom Stack', () => {
+    class CustomStack extends Stack {
+      // You need to override the `with` method to return a new instance of your CustomStack
+      with(...keys: Array<KeyProvider<any>>): CustomStack {
+        // Use the static `applyKeys` method to apply keys to the current instance
+        return Stack.applyKeys<CustomStack>(this, keys, (internal) => new CustomStack(internal));
       }
     }
 
-    const custom = CustomContext.createEmpty();
-    expect(custom instanceof CustomContext).toBe(true);
-    expect(custom instanceof ContextStack).toBe(true);
-    const Ctx = createContext<string>({ name: 'Ctx' });
+    const custom = new CustomStack();
+    expect(custom instanceof CustomStack).toBe(true);
+    expect(custom instanceof Stack).toBe(true);
+    const Ctx = createKey<string>({ name: 'Ctx' });
     const next = custom.with(Ctx.Provider('ok'));
-    expect(next instanceof CustomContext).toBe(true);
-    expect(next instanceof ContextStack).toBe(true);
+    expect(next instanceof CustomStack).toBe(true);
+    expect(next instanceof Stack).toBe(true);
   });
 });
 
+test('CustomStackWithParams', () => {
+  class ParamsStack extends Stack {
+    // You can pass your own parameters to the constructor
+    constructor(public readonly param: string, internal: StackInternal<ParamsStack> | null = null) {
+      super(internal);
+    }
+
+    with(...keys: Array<KeyProvider<any>>): ParamsStack {
+      return Stack.applyKeys<ParamsStack>(
+        this,
+        keys,
+        (internal) => new ParamsStack(this.param, internal)
+      );
+    }
+  }
+
+  const custom = new ParamsStack('some value');
+  expect(custom.param).toBe('some value');
+  expect(custom instanceof ParamsStack).toBe(true);
+  expect(custom instanceof Stack).toBe(true);
+});
+
 test('compose', async () => {
-  const ACtx = createContext<string>({ name: 'ACtx', defaultValue: 'A' });
+  const ACtx = createKey<string>({ name: 'ACtx', defaultValue: 'A' });
 
   const mock = jest.fn();
 
-  const mid = compose<ContextStack, MaybeAsync<string>>(
+  const mid = compose<Stack, MaybeAsync<string>>(
     (ctx, next) => {
       mock('middleware 1');
       return next(ctx.with(ACtx.Provider('a1')));
@@ -106,7 +118,7 @@ test('compose', async () => {
     return tmp;
   });
 
-  const res = await mid3(ContextStack.createEmpty(), () => {
+  const res = await mid3(new Stack(), () => {
     mock('done 2');
     return 'nope2';
   });
@@ -124,7 +136,7 @@ test('compose', async () => {
 });
 
 test('create empty stack', () => {
-  expect(ContextStack.createEmpty()).toBeInstanceOf(ContextStack);
+  expect(new Stack()).toBeInstanceOf(Stack);
 });
 
 test('Compose should throw on invalid middleware type', () => {
@@ -132,13 +144,9 @@ test('Compose should throw on invalid middleware type', () => {
 });
 
 test('Debug context', () => {
-  const ACtx = createContext<string>({ name: 'ACtx', defaultValue: 'A' });
-  const BCtx = createContext<string>({ name: 'BCtx', defaultValue: 'B' });
-  const ctx = ContextStack.createEmpty().with(
-    ACtx.Provider('a1'),
-    BCtx.Provider('b1'),
-    ACtx.Provider('a2')
-  );
+  const ACtx = createKey<string>({ name: 'ACtx', defaultValue: 'A' });
+  const BCtx = createKey<string>({ name: 'BCtx', defaultValue: 'B' });
+  const ctx = new Stack().with(ACtx.Provider('a1'), BCtx.Provider('b1'), ACtx.Provider('a2'));
   expect(ctx.debug()).toMatchObject([{ value: 'a1' }, { value: 'b1' }, { value: 'a2' }]);
 });
 
@@ -146,9 +154,9 @@ test('compile README example', () => {
   const originalLog = console.log;
   console.log = jest.fn();
 
-  const ACtx = createContext<string>({ name: 'ACtx', defaultValue: 'A' });
+  const ACtx = createKey<string>({ name: 'ACtx', defaultValue: 'A' });
 
-  const mid = compose<ContextStack, string>(
+  const mid = compose<Stack, string>(
     (ctx, next) => {
       console.log('middleware 1');
       console.log(ctx.debug());
@@ -171,7 +179,7 @@ test('compile README example', () => {
     console.log(ctx.debug());
     return next(ctx);
   });
-  mid2(ContextStack.createEmpty(), () => {
+  mid2(new Stack(), () => {
     console.log('done 2');
     return 'nope2';
   });

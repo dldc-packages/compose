@@ -1,5 +1,5 @@
-import { CONTEXT } from './constants.ts';
-import { ContextConsumer } from './Context.ts';
+import { INTERNAL } from './constants.ts';
+import { KeyConsumer } from './Key.ts';
 
 export class MiidError extends Error {
   public constructor(message: string) {
@@ -19,11 +19,13 @@ class InvalidMiddleware extends MiidError {
 
 class MissingContext extends MiidError {
   public readonly help?: string;
-  constructor(public context: ContextConsumer<any>) {
+  constructor(public context: KeyConsumer<any>) {
     super(
-      `Cannot find context ${context.name}${context[CONTEXT].help ?? '\n' + context[CONTEXT].help}`
+      `Cannot find context ${context.name}${
+        context[INTERNAL].help ?? '\n' + context[INTERNAL].help
+      }`
     );
-    this.help = context[CONTEXT].help;
+    this.help = context[INTERNAL].help;
   }
 }
 
