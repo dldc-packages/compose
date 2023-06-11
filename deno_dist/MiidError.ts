@@ -20,11 +20,7 @@ class InvalidMiddleware extends MiidError {
 class MissingContext extends MiidError {
   public readonly help?: string;
   constructor(public context: KeyConsumer<any>) {
-    super(
-      `Cannot find context ${context.name}${
-        context[INTERNAL].help ?? '\n' + context[INTERNAL].help
-      }`
-    );
+    super(`Cannot find context ${context.name}${context[INTERNAL].help ?? '\n' + context[INTERNAL].help}`);
     this.help = context[INTERNAL].help;
   }
 }

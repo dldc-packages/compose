@@ -25,17 +25,9 @@ export interface Key<T, HasDefault extends boolean = boolean> {
   Provider: KeyProviderFn<T, HasDefault>;
 }
 
-export function createKey<T>(options: {
-  name: string;
-  help?: string;
-  defaultValue: T;
-}): Key<T, true>;
+export function createKey<T>(options: { name: string; help?: string; defaultValue: T }): Key<T, true>;
 export function createKey<T>(options: { name: string; help?: string }): Key<T, false>;
-export function createKey<T>(options: {
-  name: string;
-  help?: string;
-  defaultValue?: T;
-}): Key<T, boolean> {
+export function createKey<T>(options: { name: string; help?: string; defaultValue?: T }): Key<T, boolean> {
   const { help, name } = options;
   const Consumer: KeyConsumer<T, any> = {
     name,

@@ -74,11 +74,7 @@ class ParamsStack extends Stack {
   }
 
   with(...keys: Array<KeyProvider<any>>): ParamsStack {
-    return Stack.applyKeys<ParamsStack>(
-      this,
-      keys,
-      (internal) => new ParamsStack(this.param, internal)
-    );
+    return Stack.applyKeys<ParamsStack>(this, keys, (internal) => new ParamsStack(this.param, internal));
   }
 }
 

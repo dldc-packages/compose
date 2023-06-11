@@ -50,9 +50,7 @@ export class Stack {
     return this.readInternal(ctx).found;
   }
 
-  get<T, HasDefault extends boolean>(
-    ctx: KeyConsumer<T, HasDefault>
-  ): HasDefault extends true ? T : T | null {
+  get<T, HasDefault extends boolean>(ctx: KeyConsumer<T, HasDefault>): HasDefault extends true ? T : T | null {
     const res = this.readInternal(ctx);
     if (res.found === false) {
       if (ctx[INTERNAL].hasDefault) {
@@ -76,12 +74,7 @@ export class Stack {
 
   debug(): Array<{ value: any; ctxId: string }> {
     // istanbul ignore next
-    const world: any =
-      typeof globalThis !== undefined
-        ? globalThis
-        : typeof window !== 'undefined'
-        ? window
-        : global;
+    const world: any = typeof globalThis !== undefined ? globalThis : typeof window !== 'undefined' ? window : global;
     const idMap = world[MIID_DEBUG] || new Map<any, string>();
     if (!world[MIID_DEBUG]) {
       world[MIID_DEBUG] = idMap;

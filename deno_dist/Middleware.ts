@@ -31,8 +31,6 @@ export function composeAdvanced<I, O, T extends O = O>(
   };
 }
 
-export function compose<I, O>(
-  ...middlewares: Array<Middleware<I, O, O> | null>
-): Middleware<I, O, O> {
+export function compose<I, O>(...middlewares: Array<Middleware<I, O, O> | null>): Middleware<I, O, O> {
   return composeAdvanced((v) => v, middlewares);
 }

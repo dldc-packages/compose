@@ -1,4 +1,5 @@
-import { createKey, MiidError, compose, Stack, StackInternal, KeyProvider } from '../src/mod';
+import { describe, expect, test, vi } from 'vitest';
+import { KeyProvider, MiidError, Stack, StackInternal, compose, createKey } from '../src/mod';
 
 type MaybeAsync<T> = T | Promise<T>;
 
@@ -72,11 +73,7 @@ test('CustomStackWithParams', () => {
     }
 
     with(...keys: Array<KeyProvider<any>>): ParamsStack {
-      return Stack.applyKeys<ParamsStack>(
-        this,
-        keys,
-        (internal) => new ParamsStack(this.param, internal)
-      );
+      return Stack.applyKeys<ParamsStack>(this, keys, (internal) => new ParamsStack(this.param, internal));
     }
   }
 
@@ -89,7 +86,7 @@ test('CustomStackWithParams', () => {
 test('compose', async () => {
   const ACtx = createKey<string>({ name: 'ACtx', defaultValue: 'A' });
 
-  const mock = jest.fn();
+  const mock = vi.fn();
 
   const mid = compose<Stack, MaybeAsync<string>>(
     (ctx, next) => {
@@ -152,7 +149,7 @@ test('Debug context', () => {
 
 test('compile README example', () => {
   const originalLog = console.log;
-  console.log = jest.fn();
+  console.log = vi.fn();
 
   const ACtx = createKey<string>({ name: 'ACtx', defaultValue: 'A' });
 
