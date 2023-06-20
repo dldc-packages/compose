@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "include": ["src", "tests"],
+  "include": ["src", "tests", "src/.ts"],
   "compilerOptions": {
     "target": "ESNext",
     "module": "ES2020",
