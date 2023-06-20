@@ -1,6 +1,6 @@
 {
   "name": "miid",
-  "version": "6.0.5",
+  "version": "7.0.0-0",
   "description": "A middleware and context system",
   "keywords": [
     "middleware",
