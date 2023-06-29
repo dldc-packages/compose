@@ -1,5 +1,5 @@
 {
-  "name": "miid",
+  "name": "@dldc/compose",
   "version": "7.0.0",
   "description": "A middleware and context system",
   "keywords": [
@@ -7,13 +7,13 @@
     "context",
     "typescript"
   ],
-  "homepage": "https://github.com/etienne-dldc/miid#readme",
+  "homepage": "https://github.com/dldc-packages/compose#readme",
   "bugs": {
-    "url": "https://github.com/etienne-dldc/miid/issues"
+    "url": "https://github.com/dldc-packages/compose/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/etienne-dldc/miid.git"
+    "url": "git+https://github.com/dldc-packages/compose.git"
   },
   "license": "MIT",
   "author": "Etienne Dldc <e.deladonchamps@gmail.com>",
