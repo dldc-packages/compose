@@ -8,7 +8,7 @@ export type Middlewares<I, O, T extends O = O> = Array<Middleware<I, O, T>>;
 
 export function composeAdvanced<I, O, T extends O = O>(
   transform: (output: O) => T,
-  middlewares: Array<Middleware<I, O, T> | null>
+  middlewares: Array<Middleware<I, O, T> | null>,
 ): Middleware<I, O, T> {
   const resolved = middlewares.filter((v): v is Middleware<I, O, T> => v !== null);
   resolved.forEach((middle, index) => {
@@ -34,7 +34,10 @@ export function compose<I, O>(...middlewares: Array<Middleware<I, O, O> | null>)
 }
 
 export class InvalidMiddlewareError extends Error {
-  constructor(public middleware: any, infos: string) {
+  constructor(
+    public middleware: any,
+    infos: string,
+  ) {
     super(`Invalid middleware: ${infos}`);
     Object.setPrototypeOf(this, new.target.prototype);
   }

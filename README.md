@@ -25,7 +25,7 @@ const mid = compose<Stack, string>(
     console.log(ctx.get(ACtx.Consumer));
     console.log(ctx.debug());
     return next(ctx.with(ACtx.Provider('a3')));
-  }
+  },
 );
 const mid2 = compose(mid, (ctx, next) => {
   console.log('done');
@@ -69,7 +69,10 @@ If you want to pass custom arguments to yout CustomStack you need to override th
 ```ts
 class ParamsStack extends Stack {
   // You can pass your own parameters to the constructor
-  constructor(public readonly param: string, internal: StackInternal<ParamsStack> | null = null) {
+  constructor(
+    public readonly param: string,
+    internal: StackInternal<ParamsStack> | null = null,
+  ) {
     super(internal);
   }
 

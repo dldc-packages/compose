@@ -18,7 +18,7 @@ test('compose', async () => {
     (ctx, next) => {
       mock('middleware 3', ctx);
       return next(ctx + 1);
-    }
+    },
   );
 
   const mid2 = compose(mid, async (ctx, next) => {
