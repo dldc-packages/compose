@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+dependencies:
+  '@dldc/erreur':
+    specifier: ^3.0.7
+    version: 3.0.7
+
 devDependencies:
   '@types/node':
     specifier: ^20.4.1
@@ -84,6 +89,16 @@ packages:
   /@bcoe/v8-coverage@0.2.3:
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
     dev: true
+
+  /@dldc/erreur@3.0.7:
+    resolution: {integrity: sha512-HV9e5/O80YleOjXA6D5Wog83Ar8yhwzM67PdhLF2LiB0jSKyMODIPOI+8H/qauYDqU/51zmVMryV9j/CLh3CMA==}
+    dependencies:
+      '@dldc/stack': 3.1.0
+    dev: false
+
+  /@dldc/stack@3.1.0:
+    resolution: {integrity: sha512-br/OD1JEGeEmJNqaRZQ6cT+NGkR6sI0ECw7+KYl89nWIjmI0PazdjpUnof+gr7OEB0yV1FQTvvjVq29eNOfJ2w==}
+    dev: false
 
   /@esbuild/android-arm64@0.18.11:
     resolution: {integrity: sha512-snieiq75Z1z5LJX9cduSAjUr7vEI1OdlzFPMw0HH5YI7qQHDd3qs+WZoMrWYDsfRJSq36lIA6mfZBkvL46KoIw==}

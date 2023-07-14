@@ -2,18 +2,20 @@
 // O: Output
 // T: transformed value (returned by next())
 
-export type Next<I, T> = (input: I) => T;
-export type Middleware<I, O, T extends O = O> = (input: I, next: Next<I, T>) => O;
-export type Middlewares<I, O, T extends O = O> = Array<Middleware<I, O, T>>;
+import { ErreurType } from '@dldc/erreur';
+
+export type INext<I, T> = (input: I) => T;
+export type IMiddleware<I, O, T extends O = O> = (input: I, next: INext<I, T>) => O;
+export type IMiddlewares<I, O, T extends O = O> = Array<IMiddleware<I, O, T>>;
 
 export function composeAdvanced<I, O, T extends O = O>(
   transform: (output: O) => T,
-  middlewares: Array<Middleware<I, O, T> | null>,
-): Middleware<I, O, T> {
-  const resolved = middlewares.filter((v): v is Middleware<I, O, T> => v !== null);
+  middlewares: Array<IMiddleware<I, O, T> | null>,
+): IMiddleware<I, O, T> {
+  const resolved = middlewares.filter((v): v is IMiddleware<I, O, T> => v !== null);
   resolved.forEach((middle, index) => {
     if (typeof middle !== 'function') {
-      throw new InvalidMiddlewareError(middle, `Not a function at index ${index}`);
+      throw InvalidMiddlewareError.create(middle, `Not a function at index ${index}`);
     }
   });
 
@@ -29,16 +31,14 @@ export function composeAdvanced<I, O, T extends O = O>(
   };
 }
 
-export function compose<I, O>(...middlewares: Array<Middleware<I, O, O> | null>): Middleware<I, O, O> {
+export function compose<I, O>(...middlewares: Array<IMiddleware<I, O, O> | null>): IMiddleware<I, O, O> {
   return composeAdvanced((v) => v, middlewares);
 }
 
-export class InvalidMiddlewareError extends Error {
-  constructor(
-    public middleware: any,
-    infos: string,
-  ) {
-    super(`Invalid middleware: ${infos}`);
-    Object.setPrototypeOf(this, new.target.prototype);
-  }
-}
+export const InvalidMiddlewareError = ErreurType.defineWithTransform(
+  'InvalidMiddlewareError',
+  (middleware: any, infos: string) => ({ middleware, infos }),
+  (err, provider, { infos }) => {
+    return err.with(provider).withName('InvalidMiddlewareError').withMessage(`Invalid middleware: ${infos}`);
+  },
+);

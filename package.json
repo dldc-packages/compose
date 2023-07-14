@@ -79,5 +79,8 @@
       "release": true,
       "web": true
     }
+  },
+  "dependencies": {
+    "@dldc/erreur": "^3.0.7"
   }
 }

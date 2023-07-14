@@ -1,5 +1,6 @@
+import { Erreur } from '@dldc/erreur';
 import { expect, test, vi } from 'vitest';
-import { InvalidMiddlewareError, compose } from '../src/mod';
+import { compose } from '../src/mod';
 
 type MaybeAsync<T> = T | Promise<T>;
 
@@ -49,5 +50,6 @@ test('compose', async () => {
 });
 
 test('Compose should throw on invalid middleware type', () => {
-  expect(() => compose({} as any)).toThrow(InvalidMiddlewareError);
+  expect(() => compose({} as any)).toThrow(Erreur);
+  expect(() => compose({} as any)).toThrow(`Not a function at index 0`);
 });
