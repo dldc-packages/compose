@@ -1,8 +1,8 @@
+import { ErreurType } from '@dldc/erreur';
+
 // I: Input
 // O: Output
 // T: transformed value (returned by next())
-
-import { ErreurType } from '@dldc/erreur';
 
 export type INext<I, T> = (input: I) => T;
 export type IMiddleware<I, O, T extends O = O> = (input: I, next: INext<I, T>) => O;
