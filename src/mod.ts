@@ -1,4 +1,4 @@
-import type { IKey } from '@dldc/erreur';
+import type { TKey } from '@dldc/erreur';
 import { Erreur, Key } from '@dldc/erreur';
 
 // I: Input
@@ -36,7 +36,7 @@ export function compose<I, O>(...middlewares: Array<IMiddleware<I, O, O> | null>
   return composeAdvanced((v) => v, middlewares);
 }
 
-export const InvalidMiddlewareErrorKey: IKey<{ middleware: any; infos: string }> = Key.create('InvalidMiddlewareError');
+export const InvalidMiddlewareErrorKey: TKey<{ middleware: any; infos: string }> = Key.create('InvalidMiddlewareError');
 
 export function createInvalidMiddlewareError(middleware: any, infos: string) {
   return Erreur.createWith(InvalidMiddlewareErrorKey, { middleware, infos })
