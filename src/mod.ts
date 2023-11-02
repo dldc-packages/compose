@@ -39,7 +39,7 @@ export function compose<I, O>(...middlewares: Array<IMiddleware<I, O, O> | null>
 export const InvalidMiddlewareErrorKey: TKey<{ middleware: any; infos: string }> = Key.create('InvalidMiddlewareError');
 
 export function createInvalidMiddlewareError(middleware: any, infos: string) {
-  return Erreur.createWith(InvalidMiddlewareErrorKey, { middleware, infos })
-    .withName('InvalidMiddlewareError')
-    .withMessage(`Invalid middleware: ${infos}`);
+  return Erreur.create(new Error(`Invalid middleware: ${infos}`))
+    .with(InvalidMiddlewareErrorKey.Provider({ middleware, infos }))
+    .withName('InvalidMiddlewareError');
 }
