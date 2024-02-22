@@ -85,7 +85,7 @@
     "root": true
   },
   "dependencies": {
-    "@dldc/erreur": "^6.0.3"
+    "@dldc/erreur": "^6.0.5"
   },
   "devDependencies": {
     "@types/node": "^20.11.20",

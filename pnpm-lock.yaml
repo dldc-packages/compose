@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@dldc/erreur':
-    specifier: ^6.0.3
-    version: 6.0.3
+    specifier: ^6.0.5
+    version: 6.0.5
 
 devDependencies:
   '@types/node':
@@ -113,14 +113,14 @@ packages:
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
     dev: true
 
-  /@dldc/erreur@6.0.3:
-    resolution: {integrity: sha512-jqBwfFU1585uOFe40O69srtQHduTcCWFsEGCOOcUg7S5fiuMtopwB9opKux/lVcix0lrHPskGKTAoDj3JPTm0w==}
+  /@dldc/erreur@6.0.5:
+    resolution: {integrity: sha512-8LwFi8XyNSb4bWArbeNVPrSy/hjlz+t48qtvWLhFxuKR3qXWejQmAWE6qtQQgt+HYYqdEcawqCTnbrHTmLcwSg==}
     dependencies:
-      '@dldc/stack': 4.1.5
+      '@dldc/stack': 4.1.6
     dev: false
 
-  /@dldc/stack@4.1.5:
-    resolution: {integrity: sha512-Wbyp57Ik0T7eA0ynccnjb53zVABGmwr+13+nBRAdahfSN0KZx3Uu/Sq0ja7oUGHIKAd5zK3oB0EiF8T8z2W6sg==}
+  /@dldc/stack@4.1.6:
+    resolution: {integrity: sha512-7PR6Z4vD8ynksFygn2ZjRd0rO4mltc9wtE/V02AAieTT6xSbIyftlOK9hMmk3hOQ0X2KbEKRYd/hXJtMNcj5/w==}
     dev: false
 
   /@esbuild/aix-ppc64@0.19.12:
