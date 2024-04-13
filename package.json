@@ -1,6 +1,6 @@
 {
   "name": "@dldc/compose",
-  "version": "7.2.3",
+  "version": "7.2.4",
   "description": "A middleware and context system",
   "keywords": [
     "middleware",
