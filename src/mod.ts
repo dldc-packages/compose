@@ -1,5 +1,4 @@
-import type { TKey } from '@dldc/erreur';
-import { Erreur, Key } from '@dldc/erreur';
+import { createErreurStore } from '@dldc/erreur';
 
 // I: Input
 // O: Output
@@ -16,7 +15,7 @@ export function composeAdvanced<I, O, T extends O = O>(
   const resolved = middlewares.filter((v): v is IMiddleware<I, O, T> => v !== null);
   resolved.forEach((middle, index) => {
     if (typeof middle !== 'function') {
-      throw createInvalidMiddlewareError(middle, `Not a function at index ${index}`);
+      return throwInvalidMiddlewareError(middle, `Not a function at index ${index}`);
     }
   });
 
@@ -36,10 +35,10 @@ export function compose<I, O>(...middlewares: Array<IMiddleware<I, O, O> | null>
   return composeAdvanced((v) => v, middlewares);
 }
 
-export const InvalidMiddlewareErrorKey: TKey<{ middleware: any; infos: string }> = Key.create('InvalidMiddlewareError');
+const InvalidMiddlewareErreurInternal = createErreurStore<{ middleware: any; infos: string }>();
 
-export function createInvalidMiddlewareError(middleware: any, infos: string) {
-  return Erreur.create(new Error(`Invalid middleware: ${infos}`))
-    .with(InvalidMiddlewareErrorKey.Provider({ middleware, infos }))
-    .withName('InvalidMiddlewareError');
+export const InvalidMiddlewareErreur = InvalidMiddlewareErreurInternal.asReadonly;
+
+function throwInvalidMiddlewareError(middleware: any, infos: string) {
+  return InvalidMiddlewareErreurInternal.setAndThrow(`Invalid middleware: ${infos}`, { middleware, infos });
 }
