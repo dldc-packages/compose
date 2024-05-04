@@ -1,4 +1,6 @@
 {
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "eslint.useFlatConfig": true
+  "deno.enable": true,
+  "editor.defaultFormatter": "denoland.vscode-deno",
+  "npm.autoDetect": "off",
+  "deno.lint": true
 }
