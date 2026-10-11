@@ -1,70 +1,74 @@
 {
   "name": "@dldc/compose",
-  "version": "8.0.1",
+  "version": "9.0.0",
   "description": "A middleware and context system",
   "keywords": [
-    "middleware",
     "context",
+    "middleware",
     "typescript"
   ],
   "homepage": "https://github.com/dldc-packages/compose#readme",
   "bugs": {
     "url": "https://github.com/dldc-packages/compose/issues"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/dldc-packages/compose.git"
-  },
   "license": "MIT",
   "author": "Etienne Dldc <e.deladonchamps@gmail.com>",
-  "sideEffects": false,
-  "type": "module",
-  "exports": {
-    ".": {
-      "types": "./dist/mod.d.ts",
-      "import": "./dist/mod.js",
-      "require": "./dist/mod.cjs"
-    }
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dldc-packages/compose.git"
   },
-  "main": "./dist/mod.js",
-  "types": "./dist/mod.d.ts",
   "files": [
     "dist"
   ],
-  "scripts": {
-    "build": "rimraf dist && tsup --format cjs,esm src/mod.ts --dts",
-    "build:watch": "tsup --watch --format cjs,esm src/mod.ts --dts",
-    "changelog": "auto-changelog --stdout --hide-credit true --commit-limit false -u --template https://raw.githubusercontent.com/release-it/release-it/main/templates/changelog-compact.hbs",
-    "lint": "prettier . --check && eslint . && tsc --noEmit",
-    "lint:fix": "prettier . --write . && eslint . --fix",
-    "release": "release-it --only-version",
-    "test": "pnpm run lint && vitest run --coverage",
-    "test:run": "vitest run",
-    "test:watch": "vitest --watch",
-    "test:watch:coverage": "vitest --watch --coverage",
-    "typecheck": "tsc",
-    "typecheck:watch": "tsc --watch"
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/mod.d.mts",
+      "default": "./dist/mod.mjs"
+    }
   },
-  "dependencies": {
-    "@dldc/erreur": "7.1.0"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.2.0",
-    "@types/node": "^20.12.8",
-    "@vitest/coverage-v8": "^1.6.0",
-    "auto-changelog": "^2.4.0",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "release-it": "^17.2.1",
-    "rimraf": "^5.0.5",
-    "tsup": "^8.0.2",
-    "typescript": "^5.4.5",
-    "typescript-eslint": "^7.8.0",
-    "vitest": "^1.6.0"
-  },
-  "packageManager": "pnpm@9.0.6",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
+  },
+  "scripts": {
+    "test": "vp test run",
+    "test:run": "vp test run",
+    "test:watch": "vp test",
+    "test:coverage": "vp test run --coverage",
+    "check": "vp check",
+    "lint": "vp lint",
+    "format": "vp fmt",
+    "pack": "vp pack",
+    "release:check": "vp check && vp test run && vp pack",
+    "release": "bumpp --execute \"npm run release:check\""
+  },
+  "dependencies": {
+    "@dldc/erreur": "^7.1.1"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/core": "^0.18.5",
+    "@std/testing": "jsr:@std/testing@^1.0.21",
+    "@types/node": "^24.0.0",
+    "@vitest/coverage-v8": "^5.0.3",
+    "bumpp": "^12.3.0",
+    "typescript": "^6.0.3",
+    "vite-plus": "^1.1.0"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.11.2",
+      "onFail": "warn"
+    },
+    "runtime": {
+      "name": "node",
+      "version": "26.11.1",
+      "onFail": "warn"
+    }
+  },
+  "engines": {
+    "node": "^22.18.0 || ^24.11.0 || >=26.0.0"
   }
 }

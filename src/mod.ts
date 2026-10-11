@@ -5,25 +5,17 @@ import { createErreurStore, type TErreurStore } from "@dldc/erreur";
 // T: transformed value (returned by next())
 
 export type INext<I, T> = (input: I) => T;
-export type IMiddleware<I, O, T extends O = O> = (
-  input: I,
-  next: INext<I, T>,
-) => O;
+export type IMiddleware<I, O, T extends O = O> = (input: I, next: INext<I, T>) => O;
 export type IMiddlewares<I, O, T extends O = O> = Array<IMiddleware<I, O, T>>;
 
 export function composeAdvanced<I, O, T extends O = O>(
   transform: (output: O) => T,
   middlewares: Array<IMiddleware<I, O, T> | null>,
 ): IMiddleware<I, O, T> {
-  const resolved = middlewares.filter((v): v is IMiddleware<I, O, T> =>
-    v !== null
-  );
+  const resolved = middlewares.filter((v): v is IMiddleware<I, O, T> => v !== null);
   resolved.forEach((middle, index) => {
     if (typeof middle !== "function") {
-      throw createInvalidMiddlewareError(
-        middle,
-        `Not a function at index ${index}`,
-      );
+      throw createInvalidMiddlewareError(middle, `Not a function at index ${index}`);
     }
   });
 
@@ -50,11 +42,8 @@ export type TInvalidMiddlewareErreurData = {
   infos: string;
 };
 
-const InvalidMiddlewareErreurInternal: TErreurStore<
-  TInvalidMiddlewareErreurData
-> = createErreurStore<
-  TInvalidMiddlewareErreurData
->();
+const InvalidMiddlewareErreurInternal: TErreurStore<TInvalidMiddlewareErreurData> =
+  createErreurStore<TInvalidMiddlewareErreurData>();
 
 /**
  * Use this to detect when an error comes from the compose function
@@ -64,12 +53,11 @@ const InvalidMiddlewareErreurInternal: TErreurStore<
  * InvalidMiddlewareErreur.get(err)
  * ```
  */
-export const InvalidMiddlewareErreur =
-  InvalidMiddlewareErreurInternal.asReadonly;
+export const InvalidMiddlewareErreur = InvalidMiddlewareErreurInternal.asReadonly;
 
 function createInvalidMiddlewareError(middleware: unknown, infos: string) {
-  return InvalidMiddlewareErreurInternal.setAndThrow(
-    `Invalid middleware: ${infos}`,
-    { middleware, infos },
-  );
+  return InvalidMiddlewareErreurInternal.setAndThrow(`Invalid middleware: ${infos}`, {
+    middleware,
+    infos,
+  });
 }

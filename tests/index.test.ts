@@ -1,11 +1,10 @@
-// deno-lint-ignore-file
-import { expect } from "$std/expect/mod.ts";
-import { spy } from "$std/testing/mock.ts";
-import { compose, InvalidMiddlewareErreur } from "../mod.ts";
+import { expect, test } from "vite-plus/test";
+import { spy } from "@std/testing/mock";
+import { compose, InvalidMiddlewareErreur } from "@dldc/compose";
 
 type MaybeAsync<T> = T | Promise<T>;
 
-Deno.test("compose", async () => {
+test("compose", async () => {
   const mock = spy();
 
   const mid = compose<number, MaybeAsync<string>>(
@@ -68,7 +67,7 @@ Deno.test("compose", async () => {
   expect(res).toBe("nope2");
 });
 
-Deno.test("Compose should throw on invalid middleware type", () => {
+test("Compose should throw on invalid middleware type", () => {
   expect(() => compose({} as any)).toThrow(Error);
   expect(() => compose({} as any)).toThrow(`Not a function at index 0`);
   let err: Error;
