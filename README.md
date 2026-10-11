@@ -1,97 +1,114 @@
-# 🏯 Miid
+# 🔗 Compose
 
 > A type-safe middleware system
 
-## Example
-
-```ts
-import { compose, createKey, Stack } from "miid";
-
-const ACtx = createKey<string>({ name: "ACtx", defaultValue: "A" });
-
-const mid = compose<Stack, string>(
-  (ctx, next) => {
-    console.log("middleware 1");
-    console.log(ctx.debug());
-    return next(ctx.with(ACtx.Provider("a1")));
-  },
-  (ctx, next) => {
-    console.log("middleware 2");
-    console.log(ctx.debug());
-    return next(ctx.with(ACtx.Provider("a2")));
-  },
-  (ctx, next) => {
-    console.log("middleware 3");
-    console.log(ctx.get(ACtx.Consumer));
-    console.log(ctx.debug());
-    return next(ctx.with(ACtx.Provider("a3")));
-  },
-);
-const mid2 = compose(mid, (ctx, next) => {
-  console.log("done");
-  console.log(ctx.debug());
-  return next(ctx);
-});
-mid2(new Stack(), () => {
-  console.log("done 2");
-  return "nope2";
-});
-```
+`@dldc/compose` lets you build a pipeline out of small middleware functions.
+Each middleware receives the input and a `next` function, and can transform the
+input before handing it to the middleware after it.
 
 ## Installation
 
 ```bash
-npm install miid
-# or
-yarn add miid
+npm install @dldc/compose
 ```
 
-## Extending `Stack`
-
-You can create your own `Stack`:
+## Usage
 
 ```ts
-class CustomStack extends Stack {
-  // You need to override the `with` method to return a new instance of your CustomStack
-  with(...keys: Array<KeyProvider<any>>): CustomStack {
-    // Use the static `applyKeys` method to apply keys to the current instance
-    return Stack.applyKeys<CustomStack>(
-      this,
-      keys,
-      (internal) => new CustomStack(internal),
-    );
-  }
-}
+import { compose } from "@dldc/compose";
 
-const custom = new CustomStack();
-expect(custom instanceof CustomStack).toBe(true);
-expect(custom instanceof Stack).toBe(true);
+const pipeline = compose<number, number>(
+  (ctx, next) => {
+    console.log("middleware 1", ctx); // middleware 1 0
+    return next(ctx + 1);
+  },
+  (ctx, next) => {
+    console.log("middleware 2", ctx); // middleware 2 1
+    return next(ctx + 1);
+  },
+);
+
+const result = pipeline(0, (ctx) => ctx);
+console.log(result); // 2
 ```
 
-If you want to pass custom arguments to yout CustomStack you need to override
-the `withInternal` method:
+A middleware is a function of `(input, next)`:
+
+- `input` is the current value, passed down from the middleware before it.
+- `next` calls the rest of the pipeline with a (possibly transformed) input.
+- The returned value is what the pipeline produces at that level.
+
+The function you call (the composed middleware) takes the initial input and the
+last `next`, whose return value becomes the result of the pipeline.
+
+Middlewares can be `async` — just make sure the `next` call is awaited (or
+returned) and the final result is awaited:
 
 ```ts
-class ParamsStack extends Stack {
-  // You can pass your own parameters to the constructor
-  constructor(
-    public readonly param: string,
-    internal: StackInternal<ParamsStack> | null = null,
-  ) {
-    super(internal);
-  }
+import { compose } from "@dldc/compose";
 
-  with(...keys: Array<KeyProvider<any>>): ParamsStack {
-    return Stack.applyKeys<ParamsStack>(
-      this,
-      keys,
-      (internal) => new ParamsStack(this.param, internal),
-    );
+const pipeline = compose<number, Promise<number>>(
+  async (ctx, next) => next(ctx + 1),
+  async (ctx, next) => next(ctx * 2),
+);
+
+const result = await pipeline(0, async (ctx) => ctx);
+console.log(result); // 2
+```
+
+## `composeAdvanced`
+
+`composeAdvanced` is the general form that `compose` is built on — `compose` is
+exactly `composeAdvanced((output) => output, middlewares)`. On top of
+`compose`, it takes a `transform` that narrows the output type: the result
+produced by the remaining middlewares has type `O`, and the value a middleware
+receives from `next(...)` has type `T` (with `T extends O`).
+
+In this example the middlewares may signal "no value" by returning `null`, and
+the `transform` turns that back into a concrete number — so `next(...)` is
+*always* typed `number`, never `null`:
+
+```ts
+import { composeAdvanced } from "@dldc/compose";
+
+const pipeline = composeAdvanced<number, number | null, number>(
+  (output) => output ?? 0,
+  [
+    (ctx, next) => next(ctx + 1),
+    (ctx, next) => {
+      // `next` is typed to return `number` (never `null`)
+      const value: number = next(ctx);
+      return value > 10 ? null : value;
+    },
+  ],
+);
+
+const result = pipeline(0, (ctx) => ctx);
+console.log(result); // 1
+```
+
+## Handling invalid middleware
+
+`compose` expects every middleware to be a function. Passing anything else
+throws an error that you can detect and inspect with `InvalidMiddlewareErreur`:
+
+```ts
+import { compose, InvalidMiddlewareErreur } from "@dldc/compose";
+
+try {
+  compose({} as any);
+} catch (error) {
+  if (InvalidMiddlewareErreur.has(error)) {
+    console.log(InvalidMiddlewareErreur.get(error));
+    // { middleware: {}, infos: "Not a function at index 0" }
   }
 }
-
-const custom = new ParamsStack("some value");
-expect(custom.param).toBe("some value");
-expect(custom instanceof ParamsStack).toBe(true);
-expect(custom instanceof Stack).toBe(true);
 ```
+
+## Types
+
+- `INext<I, T>` — the `next` function: `(input: I) => T`
+- `IMiddleware<I, O, T extends O = O>` — a middleware: `(input: I, next: INext<I, T>) => O`
+- `IMiddlewares<I, O, T extends O = O>` — an array of middlewares: `Array<IMiddleware<I, O, T>>`
+- `TInvalidMiddlewareErreurData` — the data linked to `InvalidMiddlewareErreur`:
+  `{ middleware: unknown; infos: string }`
